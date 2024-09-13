@@ -3,6 +3,7 @@ import credentials from "./credentials.json";
 import { TResponse } from "../../../app.model";
 import { ImageDetectionData, TextData } from "./vision.model";
 import colorName from "color-namer";
+import { Categories, getCategory } from "../../../utils/utils";
 
 const imgAnnotator = new ImageAnnotatorClient({ credentials });
 
@@ -65,7 +66,57 @@ const getImageText = async (
           };
         }
       );
-    return { data: { text, colors } };
+    const primaryColor = colors.reduce((prev, current) => {
+      return (prev.score > current.score) ? prev : current;
+    }, colors[0]);
+    const primaryColorName = primaryColor.name;
+    const primaryColorScore = primaryColor.score;
+    const colorData = {
+      primary: primaryColorName,
+      score: primaryColorScore,
+    }
+    
+
+    const brands = await fetch("https://drn-api-v2.discrescuenetwork.com/brands")
+      .then(response => response.json())
+      .catch(error => {
+        console.error("Error fetching brands:", error);
+        return [];
+      });
+
+    const brandNames = brands.data.map(brand => brand.attributes.BrandName);
+
+    const discs = await fetch("https://drn-api-v2.discrescuenetwork.com/discs")
+    .then(response => response.json())
+    .catch(error => {
+      console.error("Error fetching discs:", error);
+      return [];
+    });
+
+  const discNames = discs.data.map(disc => disc.attributes.MoldName);
+    
+    const words= text.words.map(obj => {
+      const category = getCategory(obj.word, brandNames, discNames);
+      if (
+        category === Categories.phoneNumber
+        || category === Categories.brand
+        || category === Categories.disc
+        || category === Categories.color
+      ) {
+        return {
+          ...obj, 
+          category
+        }
+      }
+      return obj;
+    })
+    
+    const textData = {
+      confidence: text.confidence,
+      words: words,
+    };
+
+    return { data: { text: textData, colors: colorData } };
   } catch (e) {
     console.error(e, "vision text error (getImageText)");
     return { errors: [] };
