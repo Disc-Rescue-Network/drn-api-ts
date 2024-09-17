@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { PostImageTextRequest } from "./ai.service.model";
 import vision from "./vision/vision";
+import categorize from "./categorize/categorize";
 
 /**
  * handle post /ai/image request to send response of vision data
@@ -19,5 +20,11 @@ export const postImageText = async (
     res.status(500).send({ errors: [] });
     return;
   }
-  res.send({ data: visionResponse.data });
+  const categorizedData = await categorize.categorizeImageText(visionResponse.data);
+
+  if ("errors" in categorizedData) {
+    res.status(500).send({ errors: [] });
+    return;
+  }
+  res.send({ data: categorizedData.data });
 };
