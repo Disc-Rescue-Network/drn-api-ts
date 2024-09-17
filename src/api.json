@@ -395,9 +395,14 @@
                       "required": ["text", "colors"],
                       "properties": {
                         "colors": {
-                          "type": "array",
-                          "items": {
-                            "$ref": "#/components/schemas/VisionResponseColors"
+                          "type": "object",
+                          "properties": {
+                            "primary": {
+                              "type": "string"
+                            },
+                            "score": {
+                              "type": "number"
+                            }
                           }
                         },
                         "text": {
@@ -1407,6 +1412,15 @@
           },
           "word": {
             "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "Brand",
+              "Disc",
+              "Phone Number",
+              "N/A"
+            ]
           }
         }
       },
