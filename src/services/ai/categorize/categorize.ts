@@ -2,6 +2,7 @@ import { TResponse } from "../../../app.model";
 import { ImageDetectionData } from "../vision/vision.model";
 import { CategorizeImageDetectionData, Category, TextData } from "./categorize.model";
 import { fetcher, phoneNumberRegex } from "../../../utils";
+import getFuse from "../../../fuse";
 
 /**
  * @param {ImageDetectionData} detected text and colors in the image
@@ -50,7 +51,10 @@ const categorizeImageText = async (
 
     const { text, colors } = imageText;
 
-    const words = text.words.map(word => {
+    const brandsFuse = getFuse(brands);
+    const discsFuse = getFuse(discs);
+
+    const words = text.words.filter(word => word.word.length > 1).map(word => {
       switch (true) {
         case phoneNumberRegex.test(word.word):
           return {
@@ -58,42 +62,38 @@ const categorizeImageText = async (
             category: Category.PhoneNumber
           };
         default:
-          const isBrandFound = brands.findIndex(brand => {
-            if (brand.includes(' ')) {
-              const splitedBrand = brand.split(' ');
-              return splitedBrand.includes(word.word.toLocaleLowerCase());
-            } else {
-              return brand.includes(word.word.toLocaleLowerCase());
-            }
-          });
+          const fuzzyDiscsResult = discsFuse.search(word.word.toLocaleLowerCase());
+          const fuzzyBrandsResult = brandsFuse.search(word.word.toLocaleLowerCase());
 
-          if (isBrandFound !== -1) {
+          if (!fuzzyDiscsResult.length && !fuzzyBrandsResult.length) {
             return {
               ...word,
-              category: Category.Brand
-            };
+              category: Category.NA
+            }
           }
 
-          const isDiscFound = discs.findIndex(disc => {
-            if (disc.includes(' ')) {
-              const splitedBrand = disc.split(' ');
-              return splitedBrand.includes(word.word.toLocaleLowerCase());
-            } else {
-              return disc.includes(word.word.toLocaleLowerCase());
-            }
-          });
+          const minScoreFuzzyDiscsResult = fuzzyDiscsResult.length ?
+            fuzzyDiscsResult.reduce((minItem: number, currentItem: { score: number }) =>
+              currentItem.score < minItem ? currentItem.score : minItem,
+              fuzzyDiscsResult[0].score
+            ) :
+            1;
+          const minScoreFuzzyBrandsResult = fuzzyBrandsResult.length ?
+            fuzzyBrandsResult.reduce((minItem: number, currentItem: { score: number }) => 
+              currentItem.score < minItem ? currentItem.score : minItem,
+              fuzzyBrandsResult[0].score
+            ) :
+            1;
 
-          if (isDiscFound !== -1) {
-            return {
+          return (minScoreFuzzyDiscsResult <= minScoreFuzzyBrandsResult) ?
+            {
               ...word,
               category: Category.Disc
-            };
-          }
-
-          return {
-            ...word,
-            category: Category.NA
-          }
+            } :
+            {
+              ...word,
+              category: Category.Brand
+            }
       }
     });
 

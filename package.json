@@ -28,6 +28,7 @@
     "express": "^4.19.2",
     "express-oauth2-jwt-bearer": "^1.6.0",
     "express-openapi-validator": "^5.2.0",
+    "fuse.js": "^7.0.0",
     "mysql2": "^3.10.3",
     "twilio": "^5.2.2",
     "vcards-js": "^2.10.0",
