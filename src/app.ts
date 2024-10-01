@@ -71,7 +71,11 @@ const requireLogin = auth({
 app.use(
   cors({
     allowedHeaders: ["Content-Type", "Authorization"],
-    origin: [...APP_CORS, /\.discrescuenetwork\.com$/],
+    origin: [
+        'http://localhost:3000',
+        'https://discrescuenetwork.com',
+        /\.discrescuenetwork\.com$/
+    ],
     methods: ["GET", "POST", "PATCH"],
   })
 );
