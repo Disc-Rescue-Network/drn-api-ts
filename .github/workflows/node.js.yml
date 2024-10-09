@@ -26,6 +26,7 @@ jobs:
     - run: npm i
     - run: npm run build
     - run: cp ~/.env .env
+    - run: cp ~/google-credentials.json src/services/ai
     - run: RUNNER_TRACKING_ID="" && pm2 startOrReload ecosystem.config.js
     - name: Sleep for 5 seconds
       run: sleep 5s

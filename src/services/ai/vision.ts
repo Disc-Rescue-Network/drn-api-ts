@@ -3,9 +3,9 @@ import { google } from '@google-cloud/vision/build/protos/protos'
 import { ImageAnnotatorClient } from "@google-cloud/vision";
 import colorName from "color-namer";
 
-import config from "../../config";
+import credentials from './google-credentials.json';
 
-const imgAnnotator = new ImageAnnotatorClient({ credentials: require(`${config.googleCredLoc}`) });
+const imgAnnotator = new ImageAnnotatorClient({ credentials });
 
 
 export type ImageDetectionData = {
