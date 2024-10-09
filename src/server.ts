@@ -8,7 +8,12 @@ import config from './config';
 
 (async function() {
     async function shutdown(err?: unknown) {
-        await store.default.close()
+        try {
+            await store.default.close()
+        } catch(e) {
+            console.log(e)
+        }
+
         process.exit(err ? 1 : 0)
     }
 
