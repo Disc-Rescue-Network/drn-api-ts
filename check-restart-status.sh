@@ -16,6 +16,8 @@ if [ "$HTTP_STATUS" -ne "$EXPECTED_STATUS" ]; then
 
   # Stop the PM2 process if failure
   pm2 stop $PROCESS_NAME
+
+  exit 1
 else
   echo "HTTP request successful with status: $HTTP_STATUS. Process is running fine."
 fi
