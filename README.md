@@ -1,6 +1,6 @@
 # drn-api-ts
 
-This is the Disc Rescue Network API. [Click here to view the API spec.](https://disc-rescue-network.github.io/drn-api-swagger/)
+This is the Disc Rescue Network API.
 
 ## Local Development
 
@@ -8,11 +8,9 @@ Install with `yarn`
 
 Run with `yarn start`
 
-## Packaging for Deployment
+## Deployment
 
-Run `docker build -t drn-api .`
-
-For deploying to ECR view push commands in the AWS console, then use ECS to deploy the `drn-api` ECS task.
+Github Actions are used to deploy branches master and development on AWS EC2 instance
 
 ## Environment Variables
 
@@ -24,6 +22,7 @@ This app will throw an error and notify you of missing environment variables. Th
 - `DB_USER` = Database user to use
 - `DB_PASSWORD` = Database user password
 - `DB_NAME` = The database name to query on
+- `DB_DIALECT` = The database to use
 - `AUTH_ISSUER` = issuer of auth bearer tokens
 - `AUTH_AUDIENCE` = AUD for auth bearer token validation
 - `TWILIO_SID` = Twilio SID from account details in login
@@ -37,11 +36,9 @@ This app will throw an error and notify you of missing environment variables. Th
 
 ### [/src](/src)
 
-`app.ts` is the main entry point for starting the app routing where middleware and endpoints are established.
+`server.ts` is the main entry point for starting the http server.
 
-`middleware.ts` has additional custom middleware functions, i.e. validating org_code in auth bearer token.
-
-`api.json` is the OpenAPI spec that enforces requests and responses, returning a specific error message on what is wrong with the request to the requesting client, or the server depending on which violates the response format.
+`web/index.ts` is the web request handler/listener that registers routes for different services.
 
 ### [/src/services](/src/services)
 
@@ -57,15 +54,15 @@ This includes:
 
   Opt in/out and twilio messaging functions
 
-- #### [discs](/src/services/discs)
+- #### [discs](/src/services/disc)
 
   Disc golf disc mold types
 
-- #### [brands](/src/services/brands)
+- #### [brands](/src/services/brand)
 
   Disc golf disc brands
 
-- #### [courses](/src/services/courses)
+- #### [courses](/src/services/course)
 
   Disc golf courses related to inventory in the system
 
@@ -73,8 +70,8 @@ This includes:
 
   Google Vision for text detection with confidence scores
 
-  _note: this relies on a google credentials.json being in the `/vision` subdirectory_
+  _note: this relies on a google-credentials.json being in the same directory_
 
-### [/src/db](/src/db)
+### [/src/db](/src/store)
 
-This is the database directory where all database operations live. Uses a MySQL query generation library [zzzql](https://www.npmjs.com/package/zzzql).
+This is the directory where all storage initialization and connections are maintained. Uses [Sequelize](https://www.npmjs.com/package/zzzql) ORM.
