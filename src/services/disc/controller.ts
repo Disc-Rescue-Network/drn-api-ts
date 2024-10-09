@@ -16,7 +16,7 @@ export class DiscController extends AppController {
 
         const GetDiscSchema = schemas.GetDiscSchema
 
-        this.basePath = '/discs'
+        this.basePath = '/disc'
 
         discService.init()
 

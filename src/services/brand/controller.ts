@@ -16,7 +16,7 @@ export class BrandController extends AppController {
 
         const GetBrandSchema = schemas.GetBrandSchema
 
-        this.basePath = '/brands'
+        this.basePath = '/brand'
 
         brandService.init()
 

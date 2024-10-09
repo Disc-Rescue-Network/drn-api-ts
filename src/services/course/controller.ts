@@ -13,7 +13,7 @@ export class CourseController extends AppController {
 
         const GetCourseSchema = schemas.GetCourseSchema
 
-        this.basePath = '/courses'
+        this.basePath = '/course'
 
         courseService.init()
 
