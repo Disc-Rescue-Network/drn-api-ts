@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROCESS_NAME="drn-apis"
+PROCESS_NAME="drn-api"
 URL="http://localhost:8080/health-check"
 EXPECTED_STATUS=200                         # The expected HTTP status code
 CURL_OUTPUT="curl_output.txt"               # Temporary file to store curl output
