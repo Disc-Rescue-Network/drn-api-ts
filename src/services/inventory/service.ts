@@ -13,9 +13,10 @@ export class InventoryService {
 
     findAll = async (
         pageOptions: PageOptions,
-        q: string
+        q: string,
+        orgCode: string
     ) => {
-        const where = { deleted: 0 }
+        const where: any = { deleted: 0 }
 
         const query = {
             where,
@@ -23,7 +24,6 @@ export class InventoryService {
             limit: pageOptions.limit,
             raw: true,
             nest: true,
-
         }
 
         if (q) {
@@ -35,6 +35,13 @@ export class InventoryService {
                 Sequelize.literal(`MATCH (comments) AGAINST (${sqlEscape(qs)})`),
                 { 'phoneNumber': { [Op.like]: qs }},
             ]
+        }
+
+        if (orgCode) {
+            query.where = {
+                ...query.where,
+                orgCode,
+            }
         }
 
         const result = await Inventory.findAndCountAll(query)

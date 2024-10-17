@@ -73,7 +73,8 @@ export class InventoryController extends AppController {
         async (req: Request) => {
             return inventoryService.findAll(
                 plainToClass(PageOptions, req.query),
-                req.query.q as string
+                req.query.q as string,
+                req.query.orgCode as string
             )
         }
     )
