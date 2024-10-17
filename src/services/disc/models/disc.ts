@@ -32,9 +32,7 @@ export default class DiscMold extends Model {
     category: string
 
     @ForeignKey(() => Brand)
-    @Column({
-        allowNull: false
-    })
+    @Column
     brandId: number
 
     @BelongsTo(() => Brand)
