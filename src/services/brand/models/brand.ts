@@ -12,6 +12,7 @@ export default class Brand extends Model {
     })
     @Column({
         allowNull: false,
+        unique: true
     })
     name: string
 

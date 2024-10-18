@@ -1,6 +1,8 @@
-import { DataType, Column, Table, Model, Length } from 'sequelize-typescript'
+import { BelongsTo, ForeignKey, DataType, Column, Table, Model, Length } from 'sequelize-typescript'
 
 import { StoreLib } from '../../../store/lib'
+
+import Disc from '../../disc/models/disc'
 
 
 @Table
@@ -20,14 +22,6 @@ export default class Inventory extends Model {
     })
     @Column
     name: string
-
-    @Length({
-        msg: 'length needs to be between 1 and 32',
-        min: 1,
-        max: 32
-    })
-    @Column
-    disc: string
 
     @Column({
         validate: StoreLib.isMobilePhone
@@ -96,14 +90,6 @@ export default class Inventory extends Model {
     })
     claimBy: Date
 
-    @Length({
-        msg: 'length needs to be between 1 and 32',
-        min: 1,
-        max: 32
-    })
-    @Column
-    brand: string
-
     @Column
     dateSold: Date
 
@@ -150,6 +136,13 @@ export default class Inventory extends Model {
         type: DataType.DATEONLY
     })
     dateOfReminderText: Date
+
+    @ForeignKey(() => Disc)
+    @Column
+    discId: number
+
+    @BelongsTo(() => Disc, { onDelete: 'SET NULL' })
+    disc: Disc
 }
 
 

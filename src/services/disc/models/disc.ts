@@ -35,7 +35,7 @@ export default class DiscMold extends Model {
     @Column
     brandId: number
 
-    @BelongsTo(() => Brand)
+    @BelongsTo(() => Brand, { onDelete: 'CASCADE' })
     brand: Brand
 }
 
