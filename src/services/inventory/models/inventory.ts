@@ -85,6 +85,10 @@ export default class Inventory extends Model {
     @Column
     color: string
 
+    /*
+     * Its a virtual generated column. Will need to comment out for syncing with
+     * database.
+     */
     @Column({
         type: DataType.DATEONLY
     })

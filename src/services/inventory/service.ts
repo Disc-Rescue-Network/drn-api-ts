@@ -3,6 +3,9 @@ import { escape as sqlEscape } from 'mysql2'
 
 import Inventory, { InventoryData } from './models/inventory'
 
+import Disc from '../disc/models/disc'
+import Brand from '../brand/models/brand'
+
 import { Page, PageOptions } from '../../lib/pagination'
 
 
@@ -17,9 +20,16 @@ export class InventoryService {
         orgCode: string
     ) => {
         const where: any = { deleted: 0 }
+        const include: any[] = [
+            {
+                model: Disc,
+                include: Brand
+            }
+        ]
 
         const query = {
             where,
+            include,
             offset: pageOptions.offset,
             limit: pageOptions.limit,
             raw: true,
