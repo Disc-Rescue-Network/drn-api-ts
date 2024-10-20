@@ -12,7 +12,9 @@ export default class Inventory extends Model {
         min: 1,
         max: 32
     })
-    @Column
+    @Column({
+        allowNull: false
+    })
     course: string
 
     @Length({
@@ -20,7 +22,9 @@ export default class Inventory extends Model {
         min: 1,
         max: 32
     })
-    @Column
+    @Column({
+        allowNull: false
+    })
     name: string
 
     @Column({
@@ -37,7 +41,8 @@ export default class Inventory extends Model {
     bin: string
 
     @Column({
-        type: DataType.DATEONLY
+        type: DataType.DATEONLY,
+        allowNull: false
     })
     dateFound: Date
 
@@ -63,7 +68,8 @@ export default class Inventory extends Model {
             'SOLD',
             'SOLD_OFFLINE',
             'SURRENDERED'
-        )
+        ),
+        allowNull: false
     })
     status: string
 
@@ -108,7 +114,9 @@ export default class Inventory extends Model {
     bottomImage: string
 
     @Column({
-        type: DataType.BOOLEAN
+        type: DataType.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
     })
     deleted: boolean
 
