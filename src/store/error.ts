@@ -21,25 +21,29 @@ export default function (err: Error, _: Request, res: Response, next: NextFuncti
 
         errResp.message = 'Validations failed'
         errResp.code = ERR_CODES[status]
-        errResp.details.validations = err['errors'].map((obj: {}) => {
-            return {
-                validator: obj['path'],
-                message: obj['message'],
-            }
-        })
+        errResp.details = {
+            validations: err['errors'].map((obj: {}) => {
+                return {
+                    validator: obj['path'],
+                    message: obj['message'],
+                }
+            })
+        }
     } else if (err['cause']) {  /* Sequelize field level validations */
         if (err['cause']['name'] === 'SequelizeValidationError') {
             status = 400
 
             errResp.message = 'Field validations failed'
             errResp.code = ERR_CODES[status]
-            errResp.details.fields = err['cause'].errors.map((obj: {}) => {
-                return {
-                    field: obj['path'],
-                    message: obj['message'],
-                    value: obj['value']
-                }
-            })
+            errResp.details = {
+                fields: err['cause'].errors.map((obj: {}) => {
+                    return {
+                        field: obj['path'],
+                        message: obj['message'],
+                        value: obj['value']
+                    }
+                })
+            }
         }
     } else
         return next(err)

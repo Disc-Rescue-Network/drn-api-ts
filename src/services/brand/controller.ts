@@ -14,16 +14,23 @@ export class BrandController extends AppController {
     init () {
         const schemas = generate()
 
-        const GetBrandSchema = schemas.GetBrandSchema
-
         this.basePath = '/brand'
 
         brandService.init()
 
+        this.router.post(
+            '',
+            oapi.validPath(oapiPathDef({
+                requestBodySchema: schemas.CreateBrandSchema,
+                summary: 'Create Brand'
+            })),
+            this.createBrand
+        )
+
         this.router.get(
             '',
             oapi.validPath(oapiPathDef({
-                responseData: paginatedResponse(GetBrandSchema),
+                responseData: paginatedResponse(schemas.GetBrandSchema),
                 summary: 'Get Brands'
             })),
             this.findAll
@@ -31,6 +38,12 @@ export class BrandController extends AppController {
 
         return this
     }
+
+    createBrand = AppController.asyncHandler(
+        async (req: Request) => {
+            return brandService.createBrand(req.body)
+        }
+    )
 
     findAll = AppController.asyncHandler(
         async (req: Request) => {

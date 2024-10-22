@@ -14,16 +14,23 @@ export class DiscController extends AppController {
     init () {
         const schemas = generate()
 
-        const GetDiscSchema = schemas.GetDiscSchema
-
         this.basePath = '/disc'
 
         discService.init()
 
+        this.router.post(
+            '',
+            oapi.validPath(oapiPathDef({
+                requestBodySchema: schemas.CreateDiscSchema,
+                summary: 'Create Disc'
+            })),
+            this.createDisc
+        )
+
         this.router.get(
             '',
             oapi.validPath(oapiPathDef({
-                responseData: paginatedResponse(GetDiscSchema),
+                responseData: paginatedResponse(schemas.GetDiscSchema),
                 summary: 'Get Discs'
             })),
             this.findAll
@@ -31,6 +38,12 @@ export class DiscController extends AppController {
 
         return this
     }
+
+    createDisc = AppController.asyncHandler(
+        async (req: Request) => {
+            return discService.createDisc(req.body)
+        }
+    )
 
     findAll = AppController.asyncHandler(
         async (req: Request) => {

@@ -2,14 +2,26 @@ import Sequelize from 'sequelize'
 
 import Brand from '../brand/models/brand'
 
-import DiscMold from './models/disc'
+import DiscMold, { DiscMoldData } from './models/disc'
 
 import { Page, PageOptions } from '../../lib/pagination'
+import { ConflictError } from '../../lib/error'
 
 
 export class DiscService {
     init () {
         return this
+    }
+
+    createDisc = async (data: DiscMoldData) => {
+        try {
+            return await DiscMold.create(data)
+        } catch(err) {
+            if (err.name === 'SequelizeUniqueConstraintError')
+                throw new ConflictError('Disc exists')
+
+            throw err
+        }
     }
 
     findAll = async (

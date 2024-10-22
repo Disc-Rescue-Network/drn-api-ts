@@ -1,13 +1,25 @@
 import Sequelize from 'sequelize'
 
-import Brand from './models/brand'
+import Brand, { BrandData } from './models/brand'
 
 import { Page, PageOptions } from '../../lib/pagination'
+import { ConflictError } from '../../lib/error'
 
 
 export class BrandService {
     init () {
         return this
+    }
+
+    createBrand = async (data: BrandData) => {
+        try {
+            return await Brand.create(data)
+        } catch(err) {
+            if (err.name === 'SequelizeUniqueConstraintError')
+                throw new ConflictError('Brand exists')
+
+            throw err
+        }
     }
 
     findAll = async (
