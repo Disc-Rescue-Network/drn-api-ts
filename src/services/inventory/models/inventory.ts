@@ -1,8 +1,10 @@
-import { BelongsTo, ForeignKey, DataType, Column, Table, Model, Length } from 'sequelize-typescript'
+import { Min, BelongsTo, ForeignKey, DataType, Column, Table, Model, Length } from 'sequelize-typescript'
 
 import { StoreLib } from '../../../store/lib'
 
 import Disc from '../../disc/models/disc'
+
+import { DISC_CONDITION } from '../constant'
 
 
 @Table
@@ -120,21 +122,15 @@ export default class Inventory extends Model {
     })
     deleted: boolean
 
-    @Length({
-        msg: 'length needs to be between 1 and 16',
-        min: 1,
-        max: 16
-    })
+    /* Weight in grams */
+    @Min(1)
     @Column
-    category: string
+    weight: number
 
-    @Length({
-        msg: 'length needs to be between 1 and 16',
-        min: 1,
-        max: 16
+    @Column({
+        type: DataType.ENUM(...Object.values(DISC_CONDITION))
     })
-    @Column
-    subcategory: string
+    condition: string
 
     @Length({
         msg: 'length needs to be between 1 and 17',

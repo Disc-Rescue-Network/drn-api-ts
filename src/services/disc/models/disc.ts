@@ -24,14 +24,6 @@ export default class DiscMold extends Model {
     @Column
     plasticType: string
 
-    @Length({
-        msg: 'length needs to be between 1 and 16',
-        min: 1,
-        max: 16
-    })
-    @Column
-    category: string
-
     @ForeignKey(() => Brand)
     @Column
     brandId: number
