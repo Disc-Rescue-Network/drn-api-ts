@@ -12,6 +12,7 @@ export default class Course extends Model {
     })
     @Column({
         allowNull: false,
+        unique: true
     })
     orgCode: string
 
