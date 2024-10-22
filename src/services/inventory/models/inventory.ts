@@ -3,22 +3,13 @@ import { Min, BelongsTo, ForeignKey, DataType, Column, Table, Model, Length } fr
 import { StoreLib } from '../../../store/lib'
 
 import Disc from '../../disc/models/disc'
+import Course from '../../course/models/course'
 
 import { DISC_CONDITION } from '../constant'
 
 
 @Table
 export default class Inventory extends Model {
-    @Length({
-        msg: 'length needs to be between 1 and 32',
-        min: 1,
-        max: 32
-    })
-    @Column({
-        allowNull: false
-    })
-    course: string
-
     @Length({
         msg: 'length needs to be between 1 and 32',
         min: 1,
@@ -132,13 +123,12 @@ export default class Inventory extends Model {
     })
     condition: string
 
-    @Length({
-        msg: 'length needs to be between 1 and 17',
-        min: 1,
-        max: 17
-    })
+    @ForeignKey(() => Course)
     @Column
     orgCode: string
+
+    @BelongsTo(() => Course, { onDelete: 'SET NULL', foreignKey: 'orgCode', targetKey: 'orgCode'})
+    course: Course
 
     @Column({
         type: DataType.DATEONLY

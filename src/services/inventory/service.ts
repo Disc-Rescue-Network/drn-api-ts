@@ -5,6 +5,7 @@ import Inventory, { InventoryData } from './models/inventory'
 
 import Disc from '../disc/models/disc'
 import Brand from '../brand/models/brand'
+import Course from '../course/models/course'
 
 import { Page, PageOptions } from '../../lib/pagination'
 
@@ -21,6 +22,9 @@ export class InventoryService {
     ) => {
         const where: any = { deleted: 0 }
         const include: any[] = [
+            {
+                model: Course
+            },
             {
                 model: Disc,
                 include: Brand
