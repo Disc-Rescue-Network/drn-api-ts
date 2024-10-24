@@ -4,3 +4,4 @@ dist/
 google-credentials.json
 
 .env
+src/services/ai/vision/credentials.json
