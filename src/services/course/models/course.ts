@@ -23,8 +23,9 @@ export default class Course extends Model {
     })
     @Column({
         allowNull: false,
+        unique: true
     })
-    courseName: string
+    name: string
 
     @Length({
         msg: 'length needs to be between 1 and 16',

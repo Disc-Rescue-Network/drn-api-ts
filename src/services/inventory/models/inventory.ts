@@ -5,7 +5,7 @@ import { StoreLib } from '../../../store/lib'
 import Disc from '../../disc/models/disc'
 import Course from '../../course/models/course'
 
-import { DISC_CONDITION } from '../constant'
+import { DISC_CONDITION, INVENTORY_STATUS } from '../constant'
 
 
 @Table
@@ -50,19 +50,9 @@ export default class Inventory extends Model {
     dateClaimed: Date
 
     @Column({
-        type: DataType.ENUM(
-            'UNCLAIMED',
-            'PENDING_DROPOFF',
-            'PENDING_STORE_PICKUP',
-            'PENDING_COURSE_PICKUP',
-            'PICKUP_OVERDUE',
-            'FOR_SALE',
-            'CLAIMED',
-            'SOLD',
-            'SOLD_OFFLINE',
-            'SURRENDERED'
-        ),
-        allowNull: false
+        type: DataType.ENUM(...Object.values(INVENTORY_STATUS)),
+        allowNull: false,
+        defaultValue: INVENTORY_STATUS.UNCLAIMED
     })
     status: string
 
