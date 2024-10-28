@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 
 import { FailureResponse } from '../lib/service-response'
-import { ERR_CODES } from '../lib/error'
+import { ERR_CODES, InternalServerError } from '../lib/error'
 
 import { ApiError } from '../lib/types'
 
@@ -45,6 +45,8 @@ export default function (err: Error, _: Request, res: Response, next: NextFuncti
                 })
             }
         }
+    } else if (err.name == 'SequelizeDatabaseError') {
+        return next(new InternalServerError)
     } else
         return next(err)
 

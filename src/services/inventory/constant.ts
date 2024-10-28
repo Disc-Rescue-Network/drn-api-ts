@@ -18,3 +18,14 @@ export const DISC_CONDITION = {
     FAIR: 'Fair',
     POOR: 'Poor'
 }
+
+export const PICKUP_DAYS = {
+    WEEKDAY: 'weekday',
+    WEEKEND: 'weekend'
+}
+
+export const PICKUP_TIMES = {
+    MORNING: 'morning',
+    AFTERNOON: 'afternoon',
+    EVENING: 'evening'
+}

@@ -3,7 +3,14 @@ import { BelongsTo, ForeignKey, Column, Table, Model, Length } from 'sequelize-t
 import Brand from '../../brand/models/brand'
 
 
-@Table
+@Table({
+    indexes: [
+        {
+            fields: ['name', 'brandId'],
+            unique: true
+        }
+    ]
+})
 export default class DiscMold extends Model {
     @Length({
         msg: 'length needs to be between 1 and 32',
@@ -12,7 +19,6 @@ export default class DiscMold extends Model {
     })
     @Column({
         allowNull: false,
-        unique: true
     })
     name: string
 

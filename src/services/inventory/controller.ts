@@ -66,6 +66,59 @@ export class InventoryController extends AppController {
             this.findAll
         )
 
+        this.router.get(
+            '/claim',
+            oapi.validPath(oapiPathDef({
+                responseData: paginatedResponse(schemas.GetClaimSchema),
+                summary: 'Get Claims'
+            })),
+            this.findAllClaims
+        )
+
+        this.router.post(
+            '/claim',
+            oapi.validPath(oapiPathDef({
+                requestBodySchema: schemas.CreateClaimSchema,
+                summary: 'Create Claim'
+            })),
+            this.claimItem
+        )
+
+        this.router.post(
+            '/pcm/verify',
+            oapi.validPath(oapiPathDef({
+                requestBodySchema: schemas.VerifyPCMSchema,
+                summary: 'Verify PCM'
+            })),
+            this.verifyPCM
+        )
+
+        this.router.put(
+            '/claim/verify',
+            oapi.validPath(oapiPathDef({
+                requestBodySchema: schemas.VerifyClaimSchema,
+                summary: 'Verify Claim'
+            })),
+            this.verifyClaim
+        )
+
+        this.router.patch(
+            '/claim/pickup',
+            oapi.validPath(oapiPathDef({
+                requestBodySchema: schemas.ConfirmPickupSchema,
+                summary: 'Confirm Schema'
+            })),
+            this.confirmPickup
+        )
+
+        this.router.patch(
+            '/pickup/:id',
+            oapi.validPath(oapiPathDef({
+                summary: 'Complete Pickup'
+            })),
+            this.completePickup
+        )
+
         return this
     }
 
@@ -95,7 +148,7 @@ export class InventoryController extends AppController {
 
             const newItem = await inventoryService.create({
                 ...body,
-                orgCode
+                orgCode: "org_6108516784ae"
             })
 
             if (body.textImmediately) {
@@ -139,6 +192,45 @@ export class InventoryController extends AppController {
     update = AppController.asyncHandler(
         async (req: Request) => {
             return inventoryService.update(parseInt(req.params.itemId), req.body)
+        }
+    )
+
+    verifyPCM = AppController.asyncHandler(
+        async (req: Request) => {
+            return inventoryService.verifyPCM(req.body)
+        }
+    )
+
+    findAllClaims = AppController.asyncHandler(
+        async (req: Request) => {
+            return inventoryService.findAllClaims(
+                plainToClass(PageOptions, req.query),
+                req.query.q as string,
+            )
+        }
+    )
+
+    claimItem = AppController.asyncHandler(
+        async (req: Request) => {
+            return inventoryService.claimItem(req.body)
+        }
+    )
+
+    verifyClaim = AppController.asyncHandler(
+        async (req: Request) => {
+            return inventoryService.verifyClaim(req.body)
+        }
+    )
+
+    confirmPickup = AppController.asyncHandler(
+        async (req: Request) => {
+            return inventoryService.confirmPickup(req.body)
+        }
+    )
+
+    completePickup = AppController.asyncHandler(
+        async (req: Request) => {
+            return inventoryService.completePickup(parseInt(req.params.id))
         }
     )
 }

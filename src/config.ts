@@ -1,6 +1,6 @@
 import { Dialect } from 'sequelize'
 
-import { validateOrReject, IsArray, IsInt, IsString } from 'class-validator'
+import { validateOrReject, IsArray, IsInt, IsString, IsEmail } from 'class-validator'
 
 
 export class DatabaseConfig {
@@ -55,6 +55,13 @@ export class EnvConfig {
     @IsString()
     twilioMessagingSID: string
 
+    @IsEmail()
+    @IsString()
+    supportEmail: string
+
+    @IsString()
+    supportEmailPassword: string
+
     dbConfig: DatabaseConfig
 
     async init() {
@@ -84,6 +91,9 @@ export class EnvConfig {
         this.dbConfig.host = process.env.DB_HOST
         this.dbConfig.username = process.env.DB_USER
         this.dbConfig.password = process.env.DB_PASSWORD
+
+        this.supportEmail = process.env.SUPPORT_EMAIL
+        this.supportEmailPassword = process.env.SUPPORT_EMAIL_PASSWORD
 
         Object.freeze(this)
 
