@@ -1,6 +1,7 @@
 node_modules/
 dist/
 
-credentials.json
+google-credentials.json
 
 .env
+src/services/ai/vision/credentials.json

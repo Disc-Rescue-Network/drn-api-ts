@@ -1,26 +1,47 @@
-import { DataType, Column, Table, Model } from 'sequelize-typescript'
+import { BelongsTo, ForeignKey, DataType, Column, Table, Model, Length } from 'sequelize-typescript'
+
+import { StoreLib } from '../../../store/lib'
+
+import DiscMold from '../../disc/models/disc'
 
 
-@Table({
-    tableName: 'sms_logs'
-})
+@Table
 export default class SMSLogs extends Model {
-    @Column
-    disc_id: number
-
+    @ForeignKey(() => DiscMold)
     @Column({
-        type: DataType.TEXT
+        allowNull: false
+    })
+    discId: number
+
+    @BelongsTo(() => DiscMold)
+    disc?: DiscMold
+
+    @Length({
+        msg: 'length needs to be between 1 and 160',
+        min: 1,
+        max: 160
+    })
+    @Column({
+        type: DataType.TEXT,
+        allowNull: false
     })
     message: string
 
-    @Column
-    sent_by: string
+    @Column({
+        allowNull: false,
+        validate: StoreLib.isMobilePhone
+    })
+    recipientPhone: string
 
-    @Column
-    recipient_phone: string
+    @Column({
+        allowNull: false
+    })
+    sentBy: string
 
-    @Column
-    sent_at: Date
+    @Column({
+        allowNull: false
+    })
+    sentAt: Date
 }
 
 

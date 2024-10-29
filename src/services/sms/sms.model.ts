@@ -1,5 +1,3 @@
-export const PHONE_OPT_IN_TYPE = "phoneOptIn";
-
 export const OPT_IN_KEYWORDS: string[] = [
   "start",
   "disc",
@@ -7,31 +5,6 @@ export const OPT_IN_KEYWORDS: string[] = [
   "unstop",
 ] as const;
 export const OPT_OUT_KEYWORDS: string[] = ["cancel", "stop"] as const;
-
-export type GetPhoneOptInsQuery = {
-  phone?: string[];
-  smsConsent?: (0 | 1)[];
-};
-
-export type PutPhoneOptInBody = {
-  data: {
-    id: string;
-    type: string;
-    attributes: {
-      smsConsent: 1 | 0;
-    };
-  };
-};
-
-export type PostSmsBody = {
-  data: {
-    phone: string;
-    message: string;
-    initialText: boolean;
-    discId: number;
-    userId: string;
-  };
-};
 
 export const optInMessage = `Disc Rescue Network (DRN): We’ve found your disc! Reply "CLAIM" to consent to receive text updates about your disc, including claim instructions. Msg&Data rates may apply. Reply "STOP" to opt-out.`;
 

@@ -16,7 +16,6 @@ export class MySQL {
             {
                 host,
                 dialect,
-                define: { timestamps: false }
             }
         )
 

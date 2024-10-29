@@ -1,13 +1,17 @@
 import type { FuseResultMatch, FuseResult } from 'fuse.js'
 import Fuse from 'fuse.js'
 
-import brandService from '../brands/service'
-import discService from '../discs/service'
+import brandLib from '../brand/lib'
+import discLib from '../disc/lib'
 
-import vision from "./vision/vision";
+import vision from './vision'
 
 
 export class AIService {
+    init () {
+        return this
+    }
+
     getMatchedText = (searchResult: FuseResult<FuseResultMatch>[]) => {
         const matches = []
 
@@ -31,11 +35,11 @@ export class AIService {
     }
 
     extractImageText = async (imageData: string) => {
-        var visionResponse: any = await vision.getImageText(imageData)
+        const visionResponse: any = await vision.getImageText(imageData)
 
-        const brands = await brandService.findAll();
+        const brands = await brandLib.findAll()
 
-        const words: { word: string }[] = visionResponse.data.text.words
+        const words: { word: string }[] = visionResponse.text.words
 
         const fuseOptions = {
             includeScore: true,
@@ -43,7 +47,7 @@ export class AIService {
             distance: 30,
             location: 0,
             includeMatches: true,
-            keys: ['MoldName', 'BrandName']
+            keys: ['name']
         }
 
         var fuse: Fuse<any> = new Fuse(<any>brands, fuseOptions)
@@ -58,7 +62,7 @@ export class AIService {
                 word['category'] = ['Brand']
         })
 
-        const discs = await discService.findAll()
+        const discs = await discLib.findAll()
 
         var fuse: Fuse<any> = new Fuse(<any>discs, fuseOptions)
         words.forEach(word => {
@@ -111,7 +115,7 @@ export class AIService {
             }
         })
 
-        return { data: visionResponse.data }
+        return visionResponse
     }
 }
 

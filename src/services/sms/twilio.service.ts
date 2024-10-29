@@ -1,13 +1,9 @@
 import twilio from "twilio";
-import {
-  TWILIO_SID,
-  TWILIO_AUTH_TOKEN,
-  TWILIO_SEND_FROM,
-  TWILIO_MESSAGING_SID,
-} from "../../env";
 import vCards from "vcards-js";
 
-const twilioClient = twilio(TWILIO_SID, TWILIO_AUTH_TOKEN);
+import config from '../../config'
+
+const twilioClient = twilio(config.twilioSID, config.twilioAuthToken);
 
 /**
  * send a new text (sms) through twilio
@@ -23,10 +19,10 @@ export const sendSms = async (
   try {
     const messageInstance = await twilioClient.messages.create({
       body: messageBody,
-      from: TWILIO_SEND_FROM,
+      from: config.twilioSendFrom,
       to: toPhoneNumber,
       // shortenUrls: true,
-      messagingServiceSid: TWILIO_MESSAGING_SID,
+      messagingServiceSid: config.twilioMessagingSID,
     });
     console.log(`messageInstance: ${JSON.stringify(messageInstance)}`);
     if (messageInstance.errorCode !== null) {
@@ -52,7 +48,7 @@ export const sendVCard = async (
   try {
     const messageInstance = await twilioClient.messages.create({
       body: messageBody,
-      from: TWILIO_SEND_FROM,
+      from: config.twilioSendFrom,
       to: toPhoneNumber,
       mediaUrl: [
         "https://drn-api-v2.discrescuenetwork.com/phone-opt-ins/twilio/vcf",
