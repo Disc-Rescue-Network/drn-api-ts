@@ -25,9 +25,6 @@ export class EnvConfig {
     @IsInt()
     port: number
 
-    @IsArray()
-    appCORS: string[]
-
     @IsString()
     authIssuer: string
 
@@ -72,8 +69,6 @@ export class EnvConfig {
             'createdAt',
             'updatedAt',
         ]
-
-        this.appCORS = process.env.APP_CORS.split(','),
 
         this.authIssuer = process.env.AUTH_ISSUER,
         this.authAudience = process.env.AUTH_AUDIENCE,

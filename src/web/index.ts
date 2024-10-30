@@ -44,7 +44,10 @@ export class Web {
             }),
             cors({
                 allowedHeaders: ['Content-Type', 'Authorization'],
-                origin: [...config.appCORS, /\.discrescuenetwork\.com$/],
+                origin: [
+                    'http://localhost:8080',
+                    /\.discrescuenetwork\.com$/
+                ],
                 methods: ['GET', 'POST', 'PATCH'],
             }),
         ])
