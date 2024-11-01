@@ -18,7 +18,7 @@ export class SMSlib {
         })
     }
 
-    sendSMS = async (to: string, body: string) => {
+    sendSMS = async (body: string, to: string) => {
         try {
             const messageInstance = await twilioClient.messages.create({
                 to,
