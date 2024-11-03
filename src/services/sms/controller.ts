@@ -88,7 +88,7 @@ export class SMSController extends AppController {
             return smsService.findAllPhoneOptIns(
                 plainToClass(PageOptions, req.query),
                 req.query.phoneNumber as string,
-                Boolean(parseInt(req.query.smsConsent as string)),
+                parseInt(req.query.smsConsent as string),
             )
         }
     )

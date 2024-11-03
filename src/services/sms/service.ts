@@ -14,7 +14,7 @@ export class SMSService {
     findAllPhoneOptIns = async (
         pageOptions: PageOptions,
         phoneNumber?: string,
-        smsConsent?: boolean,
+        smsConsent?: number,
     ) => {
         const where: {} = {}
 
@@ -29,7 +29,7 @@ export class SMSService {
         if (phoneNumber)
             where['phoneNumber'] = { [Op.like]: `%${phoneNumber}%` }
 
-        if (smsConsent !== undefined)
+        if (smsConsent === 0 || smsConsent === 1)
             where['smsConsent'] = smsConsent
 
         const result = await PhoneOptIn.findAndCountAll(query)
