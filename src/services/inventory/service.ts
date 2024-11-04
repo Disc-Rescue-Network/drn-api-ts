@@ -243,7 +243,7 @@ export class InventoryService {
         return 'No record updated'
     }
 
-    confirmPickup = async (data: { pickupId: number, confirmed?: boolean, cancelled?: boolean }) => {
+    confirmPickup = async (data: { pickupId: number, confirmedOn?: boolean, cancelled?: boolean }) => {
         const transaction = await mysql.sequelize.transaction()
 
         try {
@@ -268,7 +268,7 @@ export class InventoryService {
             if (!pickup.claim.verified)
                 throw new Forbidden('Pickup can not be confirmed without verification')
 
-            if (pickup.claim.item.status !== INVENTORY_STATUS.UNCLAIMED)
+            if ([ INVENTORY_STATUS.CLAIMED, INVENTORY_STATUS.SOLD, INVENTORY_STATUS.FOR_SALE, INVENTORY_STATUS.SURRENDERED, INVENTORY_STATUS.SOLD_OFFLINE ].includes(pickup.claim.item.status))
                 throw new Forbidden('The item is no longer up for claim')
 
             if (pickup.claim.surrendered)
@@ -276,11 +276,11 @@ export class InventoryService {
 
             const ticketForm = `http://localhost/inventory/claim/ticket`
 
-            if (data.confirmed) {
-                if (pickup.confirmed)
+            if (data.confirmedOn) {
+                if (pickup.confirmedOn)
                     throw new Forbidden('Pickup has already been confirmed')
 
-                await pickup.update({ confirmed: data.confirmed }, { transaction })
+                await pickup.update({ confirmedOn: data.confirmedOn }, { transaction })
                 await pickup.claim.item.update({ status: INVENTORY_STATUS.PENDING_COURSE_PICKUP }, { transaction })
 
                 if (pickup.claim.email) {
@@ -292,7 +292,7 @@ export class InventoryService {
                     const message = `
                     Disc Rescue Network (DRN): We’ve confirmed your pickup schedule!
 
-                    Please pickup your disc at ${pickup.claim.item.disc.name} at ${pickup.course.name}
+                    Please pickup your disc ${pickup.claim.item.disc.name} at ${pickup.course.name}
 
                     You can visit ${ticketForm} and submit a ticket if you do not receive it
                     `
@@ -301,8 +301,8 @@ export class InventoryService {
             }
 
             if (data.cancelled) {
-                if (pickup.confirmed) {
-                    await pickup.update({ confirmed: data.cancelled }, { transaction })
+                if (pickup.confirmedOn) {
+                    await pickup.update({ confirmedOn: null }, { transaction })
                     await pickup.claim.item.update({ status: INVENTORY_STATUS.UNCLAIMED }, { transaction })
 
                     if (pickup.claim.email) {
@@ -324,7 +324,7 @@ export class InventoryService {
 
             await transaction.commit()
 
-            if (data.confirmed)
+            if (data.confirmedOn)
                 return 'Pickup confirmed'
 
             if (data.cancelled)
@@ -402,7 +402,7 @@ export class InventoryService {
             if (pickup.claim.surrendered)
                 throw new Forbidden('The item is to be surrendered')
 
-            if (!pickup.confirmed)
+            if (!pickup.confirmedOn)
                 throw new Forbidden('Item hand-over is not allowed as pickup has not been confirmed')
 
             await pickup.claim.item.update(

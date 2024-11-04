@@ -38,14 +38,22 @@ export default class Pickup extends Model {
     })
     time: string
 
-    /*
-     * After confirming the claim, admin marks the pickup as scheduled
-     */
+    /* Admin sets this column when done with the verification */
     @Column({
-        allowNull: false,
-        defaultValue: false
+        validate: {
+            after48Hours(this: Pickup) {
+                const co = new Date(this.confirmedOn).getTime()
+                const now = Date.now()
+
+                if (co <= now)
+                    throw new Error('Confirmation date must be set after 48 hours')
+
+                if (Math.abs(co - now) < 172800000)
+                    throw new Error('Confirmation date must be after 48 hours')
+            }
+        }
     })
-    confirmed: boolean
+    confirmedOn: Date
 }
 
 
