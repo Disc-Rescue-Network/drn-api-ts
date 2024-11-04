@@ -53,7 +53,6 @@ export class SMSController extends AppController {
 
         this.router.put(
             '/phone-opt-in',
-            requireLogin,
             oapi.validPath(oapiPathDef({
                 requestBodySchema: schemas.UpdatePhoneOptInSchema,
                 summary: 'Update Phone Opt In'
