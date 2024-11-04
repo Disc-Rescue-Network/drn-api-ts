@@ -43,6 +43,9 @@ export class InventoryService {
             {
                 model: Disc,
                 include: Brand
+            },
+            {
+                model: Claim
             }
         ]
 
@@ -51,8 +54,6 @@ export class InventoryService {
             include,
             offset: pageOptions.offset,
             limit: pageOptions.limit,
-            raw: true,
-            nest: true,
         }
 
         if (q) {
@@ -280,7 +281,7 @@ export class InventoryService {
                     throw new Forbidden('Pickup has already been confirmed')
 
                 await pickup.update({ confirmed: data.confirmed }, { transaction })
-                await pickup.claim.item.update({ status: INVENTORY_STATUS.PENDING_DROPOFF }, { transaction })
+                await pickup.claim.item.update({ status: INVENTORY_STATUS.PENDING_COURSE_PICKUP }, { transaction })
 
                 if (pickup.claim.email) {
                     await sendPickupConfirmationEmail(pickup.claim.email, {
@@ -354,8 +355,6 @@ export class InventoryService {
             include,
             offset: pageOptions.offset,
             limit: pageOptions.limit,
-            raw: true,
-            nest: true,
         }
 
         if (q) {

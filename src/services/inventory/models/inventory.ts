@@ -1,9 +1,10 @@
-import { Min, BelongsTo, ForeignKey, DataType, Column, Table, Model, Length } from 'sequelize-typescript'
+import { HasMany, Min, BelongsTo, ForeignKey, DataType, Column, Table, Model, Length } from 'sequelize-typescript'
 
 import { StoreLib } from '../../../store/lib'
 
 import Disc from '../../disc/models/disc'
 import Course from '../../course/models/course'
+import Claim from './claim'
 
 import { DISC_CONDITION, INVENTORY_STATUS } from '../constant'
 
@@ -131,6 +132,9 @@ export default class Inventory extends Model {
 
     @BelongsTo(() => Disc, { onDelete: 'SET NULL' })
     disc: Disc
+
+    @HasMany(() => Claim)
+    claims: Claim[] | []
 }
 
 

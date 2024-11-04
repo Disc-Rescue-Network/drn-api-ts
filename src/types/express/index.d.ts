@@ -1,6 +1,6 @@
 import express, { NextFunction } from 'express'
 
-import { ResponseData } from '../../lib/server-response';
+import { ResponseData } from '../../lib/server-response'
 
 
 declare global {
