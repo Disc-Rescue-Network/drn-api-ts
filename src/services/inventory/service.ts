@@ -136,7 +136,10 @@ export class InventoryService {
                  * admin verification. Directly mark it verified.
                  */
                 if (otp.claim.surrendered)
-                    await otp.claim.item.update({ status: INVENTORY_STATUS.SURRENDERED })
+                    await otp.claim.item.update({
+                        verified: true,
+                        status: INVENTORY_STATUS.SURRENDERED
+                    })
                 else
                     await otp.claim.update(
                         { verified: true },
