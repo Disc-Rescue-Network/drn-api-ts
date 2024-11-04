@@ -196,9 +196,9 @@ export class InventoryService {
                     const link = `http://localhost/inventory/claim/verify?claimId=${claim.id}&vid=${v.id}`
 
                     if (claim.surrendered) {
-                        message = `Disc Rescue Network (DRN): We’ve received your claim request to surrender the disc! please visit ${link} and use the OTP ${otp} to verify your phone number associated with the claim before we move it our store.`
+                        message = `Disc Rescue Network (DRN): We’ve received your claim request to surrender the disc! Please visit ${link} and use the OTP ${otp} to verify your phone number associated with the claim before we move it our store.`
                     } else {
-                        message = `Disc Rescue Network (DRN): We’ve received your claim request! please visit ${link} and use the OTP ${otp} to verify your phone number associated with the claim.`
+                        message = `Disc Rescue Network (DRN): We’ve received your claim request! Please visit ${link} and use the OTP ${otp} to verify your phone number associated with the claim.`
                     }
                 } else if (data.phoneNumber === item.phoneNumber) {
                     const v = await VerificationOTP.create({
@@ -210,9 +210,9 @@ export class InventoryService {
                     const link = `http://localhost/inventory/claim/verify?claimId=${claim.id}&vid=${v.id}&phoneNumberMatches=1`
 
                     if (claim.surrendered) {
-                        message = `Disc Rescue Network (DRN): We’ve received your claim request! please visit ${link} and use the OTP ${otp} to verify your phone number before we move it to our store`
+                        message = `Disc Rescue Network (DRN): We’ve received your claim request! Please visit ${link} and use the OTP ${otp} to verify your phone number before we move it to our store`
                     } else {
-                        message = `Disc Rescue Network (DRN): We’ve received your claim request! please visit ${link} and use the OTP ${otp} to verify your phone number`
+                        message = `Disc Rescue Network (DRN): We’ve received your claim request! Please visit ${link} and use the OTP ${otp} to verify your phone number`
                     }
                 }
 
@@ -244,26 +244,27 @@ export class InventoryService {
 
         try {
             const pickup = await Pickup.findByPk(data.pickupId, {
-                include: [Course],
+                include: [
+                    Course,
+                    {
+                        model: Claim,
+                        include: [
+                            {
+                                model: Inventory,
+                                include: [Disc]
+                            }
+                        ],
+                    }
+                ],
                 transaction
             })
             if (!pickup)
                 throw new NotFound('No such pickup')
 
-            const claim = await Claim.findByPk(pickup.claimId, {
-                include: [
-                    {
-                        model: Inventory,
-                        include: [Disc]
-                    }
-                ],
-                transaction
-            })
-
-            if (!claim.verified)
+            if (!pickup.claim.verified)
                 throw new Forbidden('Pickup can not be confirmed without verification')
 
-            if (claim.item.status !== INVENTORY_STATUS.UNCLAIMED)
+            if (pickup.claim.item.status !== INVENTORY_STATUS.UNCLAIMED)
                 throw new Forbidden('The item is no longer up for claim')
 
             if (pickup.claim.surrendered)
@@ -278,20 +279,20 @@ export class InventoryService {
                 await pickup.update({ confirmed: data.confirmed }, { transaction })
                 await pickup.claim.item.update({ status: INVENTORY_STATUS.PENDING_DROPOFF }, { transaction })
 
-                if (claim.email) {
-                    await sendPickupConfirmationEmail(claim.email, {
-                        discName: claim.item.disc.name,
+                if (pickup.claim.email) {
+                    await sendPickupConfirmationEmail(pickup.claim.email, {
+                        discName: pickup.claim.item.disc.name,
                         courseName: pickup.course.name
                     })
                 } else {
                     const message = `
                     Disc Rescue Network (DRN): We’ve confirmed your pickup schedule!
 
-                    Please pickup your disc at ${claim.item.disc.name} at ${pickup.course.name}
+                    Please pickup your disc at ${pickup.claim.item.disc.name} at ${pickup.course.name}
 
                     You can visit ${ticketForm} and submit a ticket if you do not receive it
                     `
-                    await smslib.sendSMS(message, claim.phoneNumber)
+                    await smslib.sendSMS(message, pickup.claim.phoneNumber)
                 }
             }
 
@@ -300,18 +301,18 @@ export class InventoryService {
                     await pickup.update({ confirmed: data.cancelled }, { transaction })
                     await pickup.claim.item.update({ status: INVENTORY_STATUS.UNCLAIMED }, { transaction })
 
-                    if (claim.email) {
-                        await sendPickupCancellationEmail(claim.email, {
-                            discName: claim.item.disc.name,
+                    if (pickup.claim.email) {
+                        await sendPickupCancellationEmail(pickup.claim.email, {
+                            discName: pickup.claim.item.disc.name,
                             courseName: pickup.course.name
                         })
                     } else {
                         const message = `
-                        Disc Rescue Network (DRN): We’ve cancelled your pickup schedule of ${claim.item.disc.name} at ${pickup.course.name}!
+                        Disc Rescue Network (DRN): We’ve cancelled your pickup schedule of ${pickup.claim.item.disc.name} at ${pickup.course.name}!
 
                         You can visit ${ticketForm} and submit a ticket
                         `
-                        await smslib.sendSMS(message, claim.phoneNumber)
+                        await smslib.sendSMS(message, pickup.claim.phoneNumber)
                     }
                 } else
                     throw new ConflictError('No confirmed pickup to cancel')
