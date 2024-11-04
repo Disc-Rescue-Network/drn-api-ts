@@ -48,7 +48,7 @@ export class Web {
                     'http://localhost:3000',
                     /\.discrescuenetwork\.com$/
                 ],
-                methods: ['GET', 'POST', 'PATCH'],
+                methods: ['GET', 'POST', 'PATCH', 'PUT'],
             }),
         ])
 
