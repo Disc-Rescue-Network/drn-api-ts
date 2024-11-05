@@ -10,7 +10,14 @@ export class StoreLib {
 
   static isMobilePhone = {
       isMobilePhone(value: string) {
-          return isMobilePhone(value, ['en-US', 'en-CA'])
+          const ok = isMobilePhone(
+              value,
+              ['en-US', 'en-CA', 'en-IN', 'en-GB', 'pt-BR'],
+              { strictMode: true }
+          )
+
+          if (!ok)
+              throw new Error('Not a valid phone number')
       }
   }
 
