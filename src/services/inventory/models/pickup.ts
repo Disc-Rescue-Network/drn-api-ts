@@ -42,7 +42,7 @@ export default class Pickup extends Model {
     @Column({
         validate: {
             after48Hours(this: Pickup) {
-                const co = new Date(this.confirmedOn).getTime()
+                const co = new Date(this.scheduledOn).getTime()
                 const now = Date.now()
 
                 if (co <= now)
@@ -53,7 +53,7 @@ export default class Pickup extends Model {
             }
         }
     })
-    confirmedOn: Date
+    scheduledOn: Date
 }
 
 

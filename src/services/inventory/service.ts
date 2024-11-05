@@ -243,7 +243,7 @@ export class InventoryService {
         return 'No record updated'
     }
 
-    confirmPickup = async (data: { pickupId: number, confirmedOn?: boolean, cancelled?: boolean }) => {
+    confirmPickup = async (data: { pickupId: number, scheduledOn?: boolean, cancelled?: boolean }) => {
         const transaction = await mysql.sequelize.transaction()
 
         try {
@@ -276,11 +276,11 @@ export class InventoryService {
 
             const ticketForm = `http://localhost/inventory/claim/ticket`
 
-            if (data.confirmedOn) {
-                if (pickup.confirmedOn)
+            if (data.scheduledOn) {
+                if (pickup.scheduledOn)
                     throw new Forbidden('Pickup has already been confirmed')
 
-                await pickup.update({ confirmedOn: data.confirmedOn }, { transaction })
+                await pickup.update({ scheduledOn: data.scheduledOn }, { transaction })
                 await pickup.claim.item.update({ status: INVENTORY_STATUS.PENDING_COURSE_PICKUP }, { transaction })
 
                 if (pickup.claim.email) {
@@ -301,8 +301,8 @@ export class InventoryService {
             }
 
             if (data.cancelled) {
-                if (pickup.confirmedOn) {
-                    await pickup.update({ confirmedOn: null }, { transaction })
+                if (pickup.scheduledOn) {
+                    await pickup.update({ scheduledOn: null }, { transaction })
                     await pickup.claim.item.update({ status: INVENTORY_STATUS.UNCLAIMED }, { transaction })
 
                     if (pickup.claim.email) {
@@ -324,7 +324,7 @@ export class InventoryService {
 
             await transaction.commit()
 
-            if (data.confirmedOn)
+            if (data.scheduledOn)
                 return 'Pickup confirmed'
 
             if (data.cancelled)
@@ -402,7 +402,7 @@ export class InventoryService {
             if (pickup.claim.surrendered)
                 throw new Forbidden('The item is to be surrendered')
 
-            if (!pickup.confirmedOn)
+            if (!pickup.scheduledOn)
                 throw new Forbidden('Item hand-over is not allowed as pickup has not been confirmed')
 
             await pickup.claim.item.update(
