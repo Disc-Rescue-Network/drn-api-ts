@@ -39,7 +39,9 @@ export default class DiscMold extends Model {
     category: string
 
     @ForeignKey(() => Brand)
-    @Column
+    @Column({
+        allowNull: false
+    })
     brandId: number
 
     @BelongsTo(() => Brand, { onDelete: 'CASCADE' })
