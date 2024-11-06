@@ -25,16 +25,16 @@ export default class Pickup extends Model {
     course: Course
 
     @Column({
-        type: DataType.ENUM(...Object.values(PICKUP_DAYS)),
+        type: DataType.JSON,
         allowNull: false,
-        defaultValue: PICKUP_DAYS.WEEKEND
+        defaultValue: [PICKUP_DAYS.WEEKEND]
     })
     day: Date
 
     @Column({
-        type: DataType.ENUM(...Object.values(PICKUP_TIMES)),
+        type: DataType.JSON,
         allowNull: false,
-        defaultValue: PICKUP_TIMES.AFTERNOON
+        defaultValue: [PICKUP_TIMES.AFTERNOON]
     })
     time: string
 

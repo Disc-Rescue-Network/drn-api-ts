@@ -70,6 +70,10 @@ export default function () {
         }
     )
     CreateClaimSchema.properties['pickup']['additionalProperties'] = false
+    CreateClaimSchema.properties['pickup']['properties']['day']['anyOf'] = undefined
+    CreateClaimSchema.properties['pickup']['properties']['day']['type'] = 'array'
+    CreateClaimSchema.properties['pickup']['properties']['time']['anyOf'] = undefined
+    CreateClaimSchema.properties['pickup']['properties']['time']['type'] = 'array'
 
     const GetClaimSchema = schemaManager.generate(Claim, strategy, {
         associations: false
@@ -106,7 +110,8 @@ export default function () {
             verified: {
                 type: 'boolean',
             },
-        }
+        },
+        required: ['claimId', 'verified']
     }
 
     const ConfirmPickupSchema = {
@@ -116,13 +121,19 @@ export default function () {
                 type: 'integer',
                 minimum: 1
             },
-            confirmed: {
-                type: 'boolean',
+            scheduledOn: {
+                type: 'string',
+                format: 'date-time'
             },
             cancelled: {
                 type: 'boolean',
             },
-        }
+        },
+        required: ['pickupId'],
+        oneOf: [
+            { required: ['scheduledOn'] },
+            { required: ['cancelled'] }
+        ]
     }
 
     return {
