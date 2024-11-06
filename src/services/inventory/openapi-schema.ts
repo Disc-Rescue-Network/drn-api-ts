@@ -20,12 +20,21 @@ export default function () {
             'orgCode',
             'dateClaimed',
             'dateTexted',
+            'claimBy',
             ...config.autoAttributes
         ],
         associations: false
     })
 
-    const UpdateInventorySchema = CreateInventorySchema
+    const UpdateInventorySchema = schemaManager.generate(Inventory, strategy, {
+        exclude: [
+            'claimBy',
+            ...config.autoAttributes
+        ],
+        associations: false
+    })
+    UpdateInventorySchema['minProperties'] = 1
+    UpdateInventorySchema['required'] = undefined
 
     const GetInventorySchema = schemaManager.generate(Inventory, strategy, {
         associations: false

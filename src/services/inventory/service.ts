@@ -88,7 +88,11 @@ export class InventoryService {
     }
 
     update = async (id: number, data: Partial<InventoryData>) => {
-        return Inventory.update(data, { where: { id } })
+        const result = await Inventory.update(data, { where: { id } })
+        if (result[0])
+            return 'Record updated'
+
+        throw new NotFound('No such record to update')
     }
 
     getUnclaimedInventory = async (phoneNumber: string) => {
@@ -240,7 +244,7 @@ export class InventoryService {
         if (result[0])
             return 'Record updated'
 
-        return 'No record updated'
+        throw new NotFound('No such record to update')
     }
 
     confirmPickup = async (data: { pickupId: number, scheduledOn?: boolean, cancelled?: boolean }) => {
