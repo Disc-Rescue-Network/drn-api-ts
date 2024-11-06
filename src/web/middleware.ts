@@ -2,6 +2,8 @@ import { auth } from 'express-oauth2-jwt-bearer'
 
 import config from '../config'
 
+import { Forbidden } from '../lib/error'
+
 
 /**
  * Middleware that requires a minimal valid auth token
@@ -60,9 +62,7 @@ export const requireOrgAuth = (
     if (userOrgCode === recordOrgCode) {
       next();
     } else {
-      res.status(403).send({
-        errors: [{ code: "403", message: "unauthorized" }],
-      });
+        next(new Forbidden('Organization is different'))
     }
   };
 };

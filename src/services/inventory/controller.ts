@@ -148,7 +148,7 @@ export class InventoryController extends AppController {
 
             const newItem = await inventoryService.create({
                 ...body,
-                orgCode: "org_6108516784ae"
+                orgCode
             })
 
             if (body.textImmediately) {

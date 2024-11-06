@@ -168,6 +168,11 @@ export class InventoryService {
 
         const item = await Inventory.findByPk(data.itemId, { transaction })
 
+        const course = await Course.findByPk(data.pickup.courseId)
+
+        if (item.orgCode !== course.orgCode)
+            throw new Forbidden('Pickup should mention the same course where the disc was recovered from')
+
         if (!item)
             throw new NotFound('No such disc to claim')
 
