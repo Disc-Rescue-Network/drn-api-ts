@@ -7,6 +7,8 @@ import Course from '../course/models/course'
 
 import config from '../../config'
 
+import { PICKUP_PREFERENCE } from './constant'
+
 
 export default function () {
     const schemaManager = new SchemaManager
@@ -70,10 +72,12 @@ export default function () {
         }
     )
     CreateClaimSchema.properties['pickup']['additionalProperties'] = false
-    CreateClaimSchema.properties['pickup']['properties']['day']['anyOf'] = undefined
-    CreateClaimSchema.properties['pickup']['properties']['day']['type'] = 'array'
-    CreateClaimSchema.properties['pickup']['properties']['time']['anyOf'] = undefined
-    CreateClaimSchema.properties['pickup']['properties']['time']['type'] = 'array'
+    CreateClaimSchema.properties['pickup']['properties']['preference']['anyOf'] = undefined
+    CreateClaimSchema.properties['pickup']['properties']['preference']['type'] = 'array'
+    CreateClaimSchema.properties['pickup']['properties']['preference']['items'] = {
+        'type': 'string',
+        'enum': Object.values(PICKUP_PREFERENCE)
+    }
 
     const GetClaimSchema = schemaManager.generate(Claim, strategy, {
         associations: false

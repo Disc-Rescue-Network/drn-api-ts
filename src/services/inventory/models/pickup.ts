@@ -3,7 +3,7 @@ import { DataType, BelongsTo, ForeignKey, Column, Table, Model } from 'sequelize
 import Claim from '../../inventory/models/claim'
 import Course from '../../course/models/course'
 
-import { PICKUP_DAYS, PICKUP_TIMES } from '../constant'
+import { PICKUP_PREFERENCE } from '../constant'
 
 
 @Table
@@ -27,16 +27,9 @@ export default class Pickup extends Model {
     @Column({
         type: DataType.JSON,
         allowNull: false,
-        defaultValue: [PICKUP_DAYS.WEEKEND]
+        defaultValue: [PICKUP_PREFERENCE.WEEKEND_MORNING]
     })
-    day: Date
-
-    @Column({
-        type: DataType.JSON,
-        allowNull: false,
-        defaultValue: [PICKUP_TIMES.AFTERNOON]
-    })
-    time: string
+    preference: string
 
     /* Admin sets this column when done with the verification */
     @Column({

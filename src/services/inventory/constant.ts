@@ -19,13 +19,12 @@ export const DISC_CONDITION = {
     POOR: 'Poor'
 }
 
-export const PICKUP_DAYS = {
-    WEEKDAY: 'weekday',
-    WEEKEND: 'weekend'
-}
+export const PICKUP_PREFERENCE = {
+    WEEKDAY_MORNING: 'Weekday Morning',
+    WEEKDAY_AFTERNOON: 'Weekday Afternoon',
+    WEEKDAY_EVENING: 'Weekday Evening',
 
-export const PICKUP_TIMES = {
-    MORNING: 'morning',
-    AFTERNOON: 'afternoon',
-    EVENING: 'evening'
+    WEEKEND_MORNING: 'Weekend Morning',
+    WEEKEND_AFTERNOON: 'Weekend Afternoon',
+    WEEKEND_EVENING: 'Weekend Evening',
 }
