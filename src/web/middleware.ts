@@ -1,3 +1,5 @@
+import { Request, Response, NextFunction } from 'express'
+
 import { auth } from 'express-oauth2-jwt-bearer'
 
 import config from '../config'
@@ -9,63 +11,50 @@ import { Forbidden } from '../lib/error'
  * Middleware that requires a minimal valid auth token
  */
 export const requireLogin = auth({
-  issuerBaseURL: config.authIssuer,
-  audience: config.authAudience,
-});
+    issuerBaseURL: config.authIssuer,
+    audience: config.authAudience,
+})
+
+export const extractOrgCode = (req: Request): string | null => {
+    const orgCode = req.auth?.payload?.org_code;
+    if (typeof orgCode !== 'string')
+        return null
+
+    const userOrgCode = orgCode.trim()
+    if (!userOrgCode)
+        return null
+
+    return userOrgCode
+}
 
 /**
- * Handle extracting the org_code from the request auth jwt claims
- * if not found or invalid sends an error to the client and returns null
- * else returns the users org_code
- *
- * @param {Request} req express request
- * @param {Response} res express response
- * @returns {string | null} `string` if userCode is in auth claim | `null` if not valid and error response sent
- */
-export const handleOrgCode = (req, res): string | null => {
-  const userOrgCodeRaw = req.auth?.payload?.org_code;
-  if (typeof userOrgCodeRaw !== "string" || !userOrgCodeRaw) {
-    res.status(400).send({
-      errors: [{ code: "no_org_code", message: "no org in auth" }],
-    });
-    return null;
-  }
-  const userOrgCode = userOrgCodeRaw.trim();
-  if (!userOrgCode) {
-    res.status(400).send({
-      errors: [{ code: "no_org_code", message: "no org in auth" }],
-    });
-    return null;
-  }
-  return userOrgCode;
-};
-
-/**
- * middleware placed on routes to enforce user org_code claim
+ * Middleware placed on routes to enforce user org_code claim
  *
  * @param {Promise<string | null>} getOrgCode function to get the orgCode to compare against
  * @returns
  */
 export const requireOrgAuth = (
-  getOrgCode: (request, response) => Promise<string | null>
-): ((req: any, res: any, next: any) => Promise<void>) => {
-  return async (req, res, next) => {
-    if (allowClientCredentialsGrantType(req)) {
-      next();
-      return;
+    getOrgCode: (req: Request, res: Response) => Promise<string | null>
+): ((req: Request, res: Response, next: NextFunction) => Promise<void>) => {
+    return async (req, res, next) => {
+        if (allowClientCredentialsGrantType(req))
+            return next()
+
+        const userOrgCode = extractOrgCode(req)
+        if (!userOrgCode)
+            return next(new Forbidden('Organization is missing in auth payload'))
+
+        try {
+            const recordOrgCode = await getOrgCode(req, res)
+            if (userOrgCode !== recordOrgCode)
+                return next(new Forbidden('Organization is different'))
+        } catch(err) {
+            return next(err)
+        }
+
+        next()
     }
-    const userOrgCode = handleOrgCode(req, res);
-    if (userOrgCode === null) {
-      return;
-    }
-    const recordOrgCode = await getOrgCode(req, res);
-    if (userOrgCode === recordOrgCode) {
-      next();
-    } else {
-        next(new Forbidden('Organization is different'))
-    }
-  };
-};
+}
 
 /**
  * Middleware to allow auth tokens authenticated directly with the oauth provider
@@ -74,14 +63,14 @@ export const requireOrgAuth = (
  * @param {Request} req express request
  * @returns {boolean}
  */
-const allowClientCredentialsGrantType = (req): boolean => {
-  const grantType = req.auth?.payload?.gty ?? null;
-  if (!Array.isArray(grantType) || !grantType.includes("client_credentials")) {
-    return false;
-  }
-  const issuer = req.auth?.payload?.iss ?? null;
-  if (issuer !== config.authIssuer) {
-    return false;
-  }
-  return true;
-};
+const allowClientCredentialsGrantType = (req: Request): boolean => {
+    const grantType = req.auth?.payload?.gty ?? null
+    if (!Array.isArray(grantType) || !grantType.includes('client_credentials'))
+        return false
+
+    const issuer = req.auth?.payload?.iss ?? null
+    if (issuer !== config.authIssuer)
+        return false
+
+    return true
+}

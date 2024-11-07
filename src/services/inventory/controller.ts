@@ -3,9 +3,9 @@ import { Request, Response } from 'express'
 import { plainToClass } from 'class-transformer'
 
 import AppController from '../../lib/app-controller'
-import { Forbidden } from '../../lib/error'
 import oapi, { oapiPathDef, paginatedResponse } from '../../lib/openapi'
 import { PageOptions } from '../../lib/pagination'
+import { NotFound } from '../../lib/error'
 
 import inventoryService from './service'
 import generate from './openapi-schema'
@@ -33,27 +33,28 @@ export class InventoryController extends AppController {
 
         this.router.patch(
             '/:itemId',
+            oapi.validPath(oapiPathDef({
+                requestBodySchema: UpdateInventorySchema,
+                summary: 'Update Inventory'
+            })),
             requireLogin,
             requireOrgAuth(async (req) => {
                 const item = await this.service.findById(parseInt(req.params.itemId))
                 if (item)
                     return item.orgCode
-                return null
+
+                throw new NotFound('No such item in inventory')
             }),
-            oapi.validPath(oapiPathDef({
-                requestBodySchema: UpdateInventorySchema,
-                summary: 'Update Inventory'
-            })),
             this.update
         )
 
         this.router.post(
             '',
-            requireLogin,
             oapi.validPath(oapiPathDef({
                 requestBodySchema: CreateInventorySchema,
                 summary: 'Create Inventory'
             })),
+            requireLogin,
             this.create
         )
 
@@ -72,6 +73,7 @@ export class InventoryController extends AppController {
                 responseData: paginatedResponse(schemas.GetClaimSchema),
                 summary: 'Get Claims'
             })),
+            requireLogin,
             this.findAllClaims
         )
 
@@ -99,6 +101,14 @@ export class InventoryController extends AppController {
                 requestBodySchema: schemas.VerifyClaimSchema,
                 summary: 'Verify Claim'
             })),
+            requireLogin,
+            requireOrgAuth(async (req) => {
+                const claim = await this.service.findClaimById(req.body.claimId)
+                if (claim)
+                    return claim.item.orgCode
+
+                throw new NotFound('No such claim')
+            }),
             this.verifyClaim
         )
 
@@ -108,6 +118,14 @@ export class InventoryController extends AppController {
                 requestBodySchema: schemas.ConfirmPickupSchema,
                 summary: 'Confirm Schema'
             })),
+            requireLogin,
+            requireOrgAuth(async (req) => {
+                const pickup = await this.service.findPickupById(req.body.pickupId)
+                if (pickup)
+                    return pickup.course.orgCode
+
+                throw new NotFound('No such pickup')
+            }),
             this.confirmPickup
         )
 
@@ -116,6 +134,14 @@ export class InventoryController extends AppController {
             oapi.validPath(oapiPathDef({
                 summary: 'Complete Pickup'
             })),
+            requireLogin,
+            requireOrgAuth(async (req) => {
+                const pickup = await this.service.findPickupById(parseInt(req.params.id))
+                if (pickup)
+                    return pickup.course.orgCode
+
+                throw new NotFound('No such pickup')
+            }),
             this.completePickup
         )
 
@@ -140,15 +166,11 @@ export class InventoryController extends AppController {
 
     create = AppController.asyncHandler(
         async (req: Request) => {
-            const orgCode = req.auth?.payload?.org_code
-            if (!orgCode)
-                throw new Forbidden('No org code', 'MISSING_ORG_CODE')
-
             const body = req.body
 
             const newItem = await inventoryService.create({
                 ...body,
-                orgCode
+                orgCode: req.auth?.payload?.org_code
             })
 
             if (body.textImmediately) {

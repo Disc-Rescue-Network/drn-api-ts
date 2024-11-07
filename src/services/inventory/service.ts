@@ -444,6 +444,24 @@ export class InventoryService {
             throw err
         }
     }
+
+    findClaimById = async (id: number) => {
+        return Claim.findByPk(id, {
+            include: [Inventory]
+        })
+    }
+
+    findPickupById = async (id: number) => {
+        return Pickup.findByPk(id, {
+            include: [
+                {
+                    model: Course,
+                }
+            ],
+            raw: true,
+            nest: true
+        })
+    }
 }
 
 
