@@ -222,13 +222,9 @@ export class InventoryService {
                 message = `DRN: Looks like you found your disc in one of our beacons. Use code "${otp}" to verify that it's really you.`
             }
 
-                }
-
-                await smslib.sendSMS(message, data.phoneNumber)
-            }
+            await smslib.sendSMS(message, data.phoneNumber)
 
             await transaction.commit()
-
 
             return { claim, vid: v ? v.id : undefined }
         } catch(err) {
