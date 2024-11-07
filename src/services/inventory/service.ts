@@ -9,7 +9,6 @@ import Pickup from './models/pickup'
 import { INVENTORY_STATUS } from './constant'
 import {
     sendPickupConfirmationEmail,
-    sendPickupCancellationEmail,
     sendPickupCompleteEmail
 } from './mail'
 
