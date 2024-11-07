@@ -140,16 +140,20 @@ export class InventoryService {
                  * As phone number in claim matches on disc, no need for manual
                  * admin verification. Directly mark it verified.
                  */
-                if (otp.claim.surrendered)
+                if (otp.claim.surrendered) {
                     await otp.claim.update({
                         verified: true,
+                    }, { transaction })
+
+                    await otp.claim.item.update({
                         status: INVENTORY_STATUS.SURRENDERED
                     }, { transaction })
-                else
+                } else {
                     await otp.claim.update(
                         { verified: true },
                         { where: { id: otp.claimId }, transaction, validate: false }
                     )
+                }
             }
 
             await VerificationOTP.destroy({ where: { id: data.vid }, transaction })
