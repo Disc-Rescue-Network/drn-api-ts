@@ -20,7 +20,6 @@ const pickupConfirmationTemplate = Handlebars.compile(
 const pickupCompleteTemplate = Handlebars.compile(
     `
     Your have picked up disc {{discName}} at {{courseName}}.
-    You can visit {{ticketForm}} and submit a ticket if you did not actually receive it.
     `
 )
 
@@ -51,7 +50,6 @@ function sendPickupCompleteEmail(
     context: {
         discName: string,
         courseName: string,
-        ticketForm: string
     }
 ) {
     return sendMail({

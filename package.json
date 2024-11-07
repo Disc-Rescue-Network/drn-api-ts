@@ -33,6 +33,7 @@
     "color-namer": "^1.4.0",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
     "express": "^4.21.1",
     "express-oauth2-jwt-bearer": "^1.6.0",
     "express-openapi-validator": "^5.3.7",

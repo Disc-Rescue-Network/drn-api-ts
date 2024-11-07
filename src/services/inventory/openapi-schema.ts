@@ -65,7 +65,6 @@ export default function () {
         {
             exclude: [
                 'claimId',
-                'confirmed',
                 ...config.autoAttributes
             ],
             associations: false
@@ -129,15 +128,8 @@ export default function () {
                 type: 'string',
                 format: 'date-time'
             },
-            cancelled: {
-                type: 'boolean',
-            },
         },
-        required: ['pickupId'],
-        oneOf: [
-            { required: ['scheduledOn'] },
-            { required: ['cancelled'] }
-        ]
+        required: ['pickupId', 'scheduledOn'],
     }
 
     return {
