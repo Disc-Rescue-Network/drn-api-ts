@@ -430,6 +430,22 @@ export class InventoryService {
         }
     }
 
+    surrenderDisc = async (id: number) => {
+        const claim = await Claim.findByPk(id, {
+            include: [Inventory]
+        })
+
+        if (!claim)
+            throw new NotFound('No such claim')
+
+        if (![ INVENTORY_STATUS.UNCLAIMED ].includes(claim.item.status))
+            throw new Forbidden('Item is no longer up for surrender')
+
+        await claim.update({ surrendered: true })
+
+        return 'Record updated'
+    }
+
     findClaimById = async (id: number) => {
         return Claim.findByPk(id, {
             include: [Inventory]

@@ -145,6 +145,14 @@ export class InventoryController extends AppController {
             this.completePickup
         )
 
+        this.router.patch(
+            '/claim/:id/surrender',
+            oapi.validPath(oapiPathDef({
+                summary: 'Surrender Disc'
+            })),
+            this.surrenderDisc
+        )
+
         return this
     }
 
@@ -253,6 +261,15 @@ export class InventoryController extends AppController {
     completePickup = AppController.asyncHandler(
         async (req: Request) => {
             return inventoryService.completePickup(parseInt(req.params.id))
+        }
+    )
+
+    /*
+     * API for claimer to surrender the disc in inventory
+     */
+    surrenderDisc = AppController.asyncHandler(
+        async (req: Request) => {
+            return inventoryService.surrenderDisc(parseInt(req.params.id))
         }
     )
 }
