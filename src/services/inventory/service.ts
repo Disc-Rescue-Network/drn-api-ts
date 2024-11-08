@@ -173,13 +173,13 @@ export class InventoryService {
         try {
             const item = await Inventory.findByPk(data.itemId, { transaction })
 
+            if (!item)
+                throw new NotFound('No such disc to claim')
+
             const course = await Course.findByPk(data.pickup.courseId, { transaction })
 
             if (item.orgCode !== course.orgCode)
                 throw new Forbidden('Pickup should mention the same course where the disc was recovered from')
-
-            if (!item)
-                throw new NotFound('No such disc to claim')
 
             if (item.status !== INVENTORY_STATUS.UNCLAIMED)
                 throw new Forbidden('The item is no longer up for claim')
