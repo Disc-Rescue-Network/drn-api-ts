@@ -127,7 +127,9 @@ export default class Inventory extends Model {
     dateOfReminderText: Date
 
     @ForeignKey(() => Disc)
-    @Column
+    @Column({
+        allowNull: false
+    })
     discId: number
 
     @BelongsTo(() => Disc, { onDelete: 'SET NULL' })
