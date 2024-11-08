@@ -170,29 +170,30 @@ export class InventoryService {
     claimItem = async (data: ClaimData) => {
         const transaction = await mysql.sequelize.transaction()
 
-        const item = await Inventory.findByPk(data.itemId, { transaction })
-
-        const course = await Course.findByPk(data.pickup.courseId)
-
-        if (item.orgCode !== course.orgCode)
-            throw new Forbidden('Pickup should mention the same course where the disc was recovered from')
-
-        if (!item)
-            throw new NotFound('No such disc to claim')
-
-        if (item.status !== INVENTORY_STATUS.UNCLAIMED)
-            throw new Forbidden('The item is no longer up for claim')
-
-        const prevClaim = await Claim.findOne({
-            where: {
-                userId: data.userId,
-                itemId: data.itemId,
-            }
-        })
-        if (prevClaim)
-            throw new ConflictError('You have already submitted the claim')
-
         try {
+            const item = await Inventory.findByPk(data.itemId, { transaction })
+
+            const course = await Course.findByPk(data.pickup.courseId, { transaction })
+
+            if (item.orgCode !== course.orgCode)
+                throw new Forbidden('Pickup should mention the same course where the disc was recovered from')
+
+            if (!item)
+                throw new NotFound('No such disc to claim')
+
+            if (item.status !== INVENTORY_STATUS.UNCLAIMED)
+                throw new Forbidden('The item is no longer up for claim')
+
+            const prevClaim = await Claim.findOne({
+                where: {
+                    userId: data.userId,
+                    itemId: data.itemId,
+                },
+                transaction
+            })
+            if (prevClaim)
+                throw new ConflictError('You have already submitted the claim')
+
             const claim = await Claim.create(data, { transaction, include: Pickup })
 
             let message = ''
@@ -221,7 +222,8 @@ export class InventoryService {
                 message = `DRN: Looks like you found your disc in one of our beacons. Use code "${otp}" to verify that it's really you.`
             }
 
-            await smslib.sendSMS(message, data.phoneNumber)
+            if (data.phoneNumber)
+                await smslib.sendSMS(message, data.phoneNumber)
 
             await transaction.commit()
 
