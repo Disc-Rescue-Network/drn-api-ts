@@ -245,7 +245,20 @@ export class InventoryService {
         throw new NotFound('No such record to update')
     }
 
-    confirmPickup = async (data: { pickupId: number, scheduledOn: boolean }) => {
+    getFormattedScheduleDate = (scheduledOn: string) => {
+        let so = dayjs(scheduledOn).tz('EST')
+
+        let soString = ''
+        if (dayjs().tz('EST').week() === so.week()) {
+            soString = so.format('dddd @ ha')
+        } else {
+            soString = so.format('MM/DD @ ha')
+        }
+
+        return soString
+    }
+
+    confirmPickup = async (data: { pickupId: number, scheduledOn?: string, reScheduledOn?: string }) => {
         const transaction = await mysql.sequelize.transaction()
 
         try {
@@ -276,19 +289,33 @@ export class InventoryService {
             if (pickup.claim.surrendered)
                 throw new Forbidden('The item is to be surrendered')
 
-            if (pickup.scheduledOn)
-                throw new Forbidden('Pickup has already been confirmed')
+            let message = ''
 
-            await pickup.update({ scheduledOn: data.scheduledOn }, { transaction })
-            await pickup.claim.item.update({ status: INVENTORY_STATUS.PENDING_COURSE_PICKUP }, { transaction })
+            if (data.scheduledOn) {
+                if (pickup.scheduledOn)
+                    throw new Forbidden('Pickup has already been confirmed')
 
-            let so = dayjs(pickup.scheduledOn).tz('EST')
+                await pickup.update({ scheduledOn: data.scheduledOn }, { transaction })
+                await pickup.claim.item.update({ status: INVENTORY_STATUS.PENDING_COURSE_PICKUP }, { transaction })
 
-            let soString = ''
-            if (dayjs().tz('EST').week() === so.week()) {
-                soString = so.format('dddd @ ha')
-            } else {
-                soString = so.format('MM/DD @ ha')
+                const soString = this.getFormattedScheduleDate(data.scheduledOn)
+
+                message = `DRN: Congrats on claiming your disc! You pickup has been confirmed and scheduled for: ${soString} at ${pickup.course.name}. Text TICKET if you need to make changes or don't receive your disc.`
+            }
+
+            if (data.reScheduledOn) {
+                if (!pickup.scheduledOn)
+                    throw new Forbidden('Pickup is not scheduled')
+
+                /*
+                 * If pickup is being rescheduled ALMOST within the same hour
+                 */
+                if (Math.abs(dayjs(data.reScheduledOn).diff(dayjs(pickup.scheduledOn))) < 3500000)
+                    throw new Forbidden('Pickup is being rescheduled on same time as before')
+
+                await pickup.update({ scheduledOn: data.reScheduledOn }, { transaction })
+                const soString = this.getFormattedScheduleDate(data.reScheduledOn)
+                message = `Your pickup has been modified by the ${pickup.course.name}. Your new pickup date is ${soString}. If you need to change or adjust your pickup text Ticket to open a ticket.`
             }
 
             if (pickup.claim.email) {
@@ -297,7 +324,6 @@ export class InventoryService {
                     courseName: pickup.course.name
                 })
             } else {
-                const message = `DRN: Congrats on claiming your disc! You pickup has been confirmed and scheduled for: ${soString} at ${pickup.course.name}. Text TICKET if you need to make changes or don't receive your disc.`
                 await smslib.sendSMS(message, pickup.claim.phoneNumber)
             }
 

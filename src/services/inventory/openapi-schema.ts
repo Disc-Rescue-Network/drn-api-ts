@@ -128,8 +128,16 @@ export default function () {
                 type: 'string',
                 format: 'date-time'
             },
+            reScheduledOn: {
+                type: 'string',
+                format: 'date-time'
+            },
         },
-        required: ['pickupId', 'scheduledOn'],
+        required: ['pickupId'],
+        oneOf: [
+            { required: ['scheduledOn'] },
+            { required: ['reScheduledOn'] }
+        ]
     }
 
     return {
@@ -141,6 +149,7 @@ export default function () {
         CreateClaimSchema,
         VerifyPCMSchema,
         VerifyClaimSchema,
+
         ConfirmPickupSchema,
     }
 }
