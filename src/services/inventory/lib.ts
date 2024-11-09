@@ -1,6 +1,10 @@
 import { Op } from 'sequelize'
 
 import Inventory, { InventoryData } from './models/inventory'
+import Claim from './models/claim'
+import Pickup from './models/pickup'
+import Course from '../../services/course/models/course'
+import Disc from '../../services/disc/models/disc'
 
 
 export class InventoryLib {
@@ -15,6 +19,22 @@ export class InventoryLib {
                 status: ['UNCLAIMED', 'NEW'],
                 deleted: 0
             }
+        })
+    }
+
+    getClaims = async (id: number[]) => {
+        return Claim.findAll({
+            where: { id },
+            include: [
+                {
+                    model: Inventory,
+                    include: [Disc]
+                },
+                {
+                    model: Pickup,
+                    include: [Course]
+                }
+            ],
         })
     }
 }

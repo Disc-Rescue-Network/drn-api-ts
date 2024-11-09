@@ -1,6 +1,6 @@
 import { Dialect } from 'sequelize'
 
-import { validateOrReject, IsArray, IsInt, IsString, IsEmail } from 'class-validator'
+import { ArrayNotEmpty, validateOrReject, IsArray, IsInt, IsString, IsEmail } from 'class-validator'
 
 
 export class DatabaseConfig {
@@ -59,6 +59,24 @@ export class EnvConfig {
     @IsString()
     supportEmailPassword: string
 
+    @IsString()
+    redisUri: string
+
+    @IsInt()
+    redisExpiry: number
+
+    @IsString()
+    serviceName: string
+
+    @ArrayNotEmpty()
+    allowedHosts: string[]
+
+    @IsString()
+    jwtSecret: string
+
+    @IsString()
+    jwtExpiry: string
+
     dbConfig: DatabaseConfig
 
     async init() {
@@ -89,6 +107,16 @@ export class EnvConfig {
 
         this.supportEmail = process.env.SUPPORT_EMAIL
         this.supportEmailPassword = process.env.SUPPORT_EMAIL_PASSWORD
+
+        this.redisUri = process.env.REDIS_URI
+        this.redisExpiry = parseInt(process.env.REDIS_EXPIRY)
+
+        this.jwtSecret = process.env.JWT_SECRET
+        this.jwtExpiry = process.env.JWT_EXPIRY
+
+        this.serviceName = process.env.SERVICE_NAME
+
+        this.allowedHosts = process.env.ALLOWED_HOSTS?.split(',')
 
         Object.freeze(this)
 

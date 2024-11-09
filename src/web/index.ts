@@ -1,3 +1,5 @@
+import http from 'http'
+
 import express, { NextFunction } from 'express'
 import helmet from 'helmet'
 import logger from 'morgan'
@@ -18,16 +20,17 @@ import brand from '../services/brand'
 import disc from '../services/disc'
 import sms from '../services/sms'
 import ai from '../services/ai'
-
-import config from '../config'
+import notification from '../services/notification'
 
 import healthCheck from './healthcheck'
+
+import socket from './socket'
 
 
 export class Web {
     private app: express.Application
 
-    async init() {
+    async init(server: http.Server) {
         this.app = express()
 
         this.addMany([
@@ -64,12 +67,15 @@ export class Web {
             })
         )
 
+        await socket.init(server)
+
         disc.init()
         brand.init()
         course.init()
         inventory.init()
         sms.init()
         ai.init()
+        notification.init()
 
         this.add(oapi)
 
@@ -79,6 +85,7 @@ export class Web {
         this.add(inventory.router, inventory.basePath)
         this.add(sms.router, sms.basePath)
         this.add(ai.router, ai.basePath)
+        this.add(notification.router, notification.basePath)
 
         this.add(storeErrorHandler)
         this.add(oapiErrorHandler)

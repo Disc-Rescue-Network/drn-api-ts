@@ -24,9 +24,22 @@ import smslib from '../sms/lib'
 
 import mysql from '../../store/mysql'
 
+import socketService from '../../web/socket/service'
+import notificationLib from '../notification/lib'
+import { NOTIFICATION_TYPE } from '../notification/constant'
+
 
 export class InventoryService {
-    init () {
+    async init () {
+        try {
+            const courses = await Course.findAll()
+            for (const course of courses)
+                await socketService.createRoom({ id: course.orgCode, name: course.name }, { noExpiration: true })
+        } catch(err) {
+            if (err.code !== 'EXISTS')
+                throw err
+        }
+
         return this
     }
 
@@ -222,10 +235,46 @@ export class InventoryService {
                 message = `DRN: Looks like you found your disc in one of our beacons. Use code "${otp}" to verify that it's really you.`
             }
 
+            const currentClaim = await Claim.findByPk(
+                claim.id,
+                {
+                    include: [
+                        {
+                            model: Inventory,
+                            include: [Disc]
+                        },
+                        {
+                            model: Pickup,
+                            include: [Course]
+                        }
+                    ],
+                    transaction
+                }
+            )
+
+            const notif = await notificationLib.create(
+                {
+                    type: NOTIFICATION_TYPE.CLAIM,
+                    message: `A claim for ${currentClaim.item.disc.name} at ${currentClaim.pickup.course.name} has been received`,
+                    objectId: currentClaim.id,
+                    objectType: NOTIFICATION_TYPE.CLAIM,
+                },
+                transaction
+            )
+
             if (data.phoneNumber)
                 await smslib.sendSMS(message, data.phoneNumber)
 
             await transaction.commit()
+
+            await socketService.sendToRoom(
+                currentClaim.pickup.course.orgCode,
+                {
+                    eventName: 'newClaim',
+                    message: notif.message,
+                    data: currentClaim
+                }
+            )
 
             return { claim, vid: v ? v.id : undefined }
         } catch(err) {

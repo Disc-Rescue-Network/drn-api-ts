@@ -48,7 +48,7 @@ import config from './config';
 
     await store.default.init()
 
-    await web.default.init()
+    await web.default.init(server)
 
     server.addListener('request', web.default.getRequestListener())
 })();

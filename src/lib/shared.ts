@@ -1,4 +1,7 @@
 import * as crypto from 'crypto'
+import * as jwt from 'jsonwebtoken'
+
+import envConfig from '../config'
 
 
 export const generateOTP = function(len=6) {
@@ -10,4 +13,13 @@ export const generateOTP = function(len=6) {
     }
 
     return otp.join('')
+}
+
+
+export function generateToken(data: any) {
+    return jwt.sign(data, envConfig.jwtSecret, { expiresIn: envConfig.jwtExpiry })
+}
+
+export function verifyToken(token: string) {
+    return jwt.verify(token, envConfig.jwtSecret)
 }
