@@ -12,7 +12,7 @@ import store from '../../store'
 import config from '../../config'
 
 import { BadRequest, NotFound, ConflictError } from '../../lib/error'
-import { verifyToken } from '../../lib/shared'
+import { decodeToken } from '../../lib/auth'
 
 
 export class ExtWebSocket extends WebSocket {
@@ -112,7 +112,7 @@ export class SocketService {
             return ws.close(1002, 'Auth token is missing')
 
         try {
-            const payload = verifyToken(token) as JwtPayload
+            const payload = await decodeToken(token) as JwtPayload
             ws.uid = payload.sub
         } catch (err) {
             return ws.close(1003, 'Invalid or expired token')
@@ -192,9 +192,7 @@ export class SocketService {
 
                 if(!this.conns[message.roomId][ws.uid]) return;
 
-                await Promise.all([
-                    store.delValue(`<${config.serviceName}>room<${message.roomId}>member<${ws.uid}>profile`)
-                ])
+                await store.delValue(`<${config.serviceName}>room<${message.roomId}>member<${ws.uid}>profile`)
 
                 delete this.conns[message.roomId][ws.uid]
 
