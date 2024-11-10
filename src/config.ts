@@ -77,6 +77,9 @@ export class EnvConfig {
     @IsString()
     jwtExpiry: string
 
+    @IsString()
+    drnAdminsOrgCode: string
+
     dbConfig: DatabaseConfig
 
     async init() {
@@ -115,6 +118,8 @@ export class EnvConfig {
         this.jwtExpiry = process.env.JWT_EXPIRY
 
         this.serviceName = process.env.SERVICE_NAME
+
+        this.drnAdminsOrgCode = process.env.DRN_ADMINS_ORG_CODE
 
         this.allowedHosts = process.env.ALLOWED_HOSTS?.split(',')
 

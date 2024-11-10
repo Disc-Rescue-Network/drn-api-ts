@@ -28,6 +28,8 @@ import socketService from '../../web/socket/service'
 import notificationLib from '../notification/lib'
 import { NOTIFICATION_TYPE } from '../notification/constant'
 
+import config from '../../config'
+
 
 export class InventoryService {
     async init () {
@@ -84,6 +86,13 @@ export class InventoryService {
             query.where = {
                 ...query.where,
                 orgCode,
+            }
+        } else {
+            query.where = {
+                ...query.where,
+                orgCode: {
+                    [Op.ne]: config.drnAdminsOrgCode
+                },
             }
         }
 
