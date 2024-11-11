@@ -42,4 +42,4 @@ export default class Notification extends Model {
 }
 
 
-export type NotificationData = Omit<Notification, keyof Model>
+export type NotificationData = Omit<Notification, keyof Model | 'course'>

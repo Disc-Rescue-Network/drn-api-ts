@@ -29,7 +29,7 @@ jobs:
     - run: pm2 stop drn-api
     - run: npm run build
     - run: RUNNER_TRACKING_ID="" && pm2 startOrReload ecosystem.config.js
-    - name: Sleep for 5 seconds
-      run: sleep 5s
+    - name: Sleep for 7 seconds
+      run: sleep 7s
       shell: bash
     - run: ./check-restart-status.sh
