@@ -9,6 +9,8 @@ import { PageOptions } from '../../lib/pagination'
 import notificationService from './service'
 import generate from './openapi-schema'
 
+import { requireLogin } from '../../web/middleware'
+
 
 export class NotificationController extends AppController {
     init () {
@@ -24,6 +26,7 @@ export class NotificationController extends AppController {
                 responseData: paginatedResponse(schemas.GetNotificationSchema),
                 summary: 'Get Notifications'
             })),
+            requireLogin,
             this.findAll
         )
 
@@ -43,6 +46,7 @@ export class NotificationController extends AppController {
         async (req: Request) => {
             return notificationService.findAll(
                 plainToClass(PageOptions, req.query),
+                req.auth.payload.org_code as string
             )
         }
     )

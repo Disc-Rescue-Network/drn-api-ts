@@ -267,6 +267,7 @@ export class InventoryService {
                     message: `A claim for ${currentClaim.item.disc.name} at ${currentClaim.pickup.course.name} has been received`,
                     objectId: currentClaim.id,
                     objectType: NOTIFICATION_TYPE.CLAIM,
+                    orgCode: currentClaim.pickup.course.orgCode
                 },
                 transaction
             )

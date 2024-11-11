@@ -20,8 +20,11 @@ export class NotificationService {
 
     findAll = async (
         pageOptions: PageOptions,
+        orgCode: string
     ) => {
+        const where: any = { orgCode }
         const query = {
+            where,
             offset: pageOptions.offset,
             limit: pageOptions.limit,
             raw: true,

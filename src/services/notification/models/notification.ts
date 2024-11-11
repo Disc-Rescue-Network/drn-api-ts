@@ -1,6 +1,8 @@
-import { DataType, Column, Table, Model } from 'sequelize-typescript'
+import { BelongsTo, ForeignKey, DataType, Column, Table, Model } from 'sequelize-typescript'
 
 import { NOTIFICATION_TYPE, NOTIFICATION_STATUS } from '../constant'
+
+import Course from '../../course/models/course'
 
 
 @Table
@@ -28,6 +30,15 @@ export default class Notification extends Model {
         defaultValue: NOTIFICATION_STATUS.UNREAD
     })
     status: string
+
+    @ForeignKey(() => Course)
+    @Column({
+        allowNull: false
+    })
+    orgCode: string
+
+    @BelongsTo(() => Course, { onDelete: 'CASCADE', foreignKey: 'orgCode', targetKey: 'orgCode'})
+    course: Course
 }
 
 
