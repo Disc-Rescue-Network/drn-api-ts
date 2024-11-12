@@ -6,6 +6,8 @@ import discLib from '../disc/lib'
 
 import vision from './vision'
 
+import { IMAGE_TEXT_CATEGORY } from './constant'
+
 
 export class AIService {
     init () {
@@ -59,7 +61,7 @@ export class AIService {
                 word['matchedTo'] = [matchedTo]
 
             if (result.length)
-                word['category'] = ['Brand']
+                word['category'] = [IMAGE_TEXT_CATEGORY.BRAND]
         })
 
         const discs = await discLib.findAll()
@@ -79,9 +81,9 @@ export class AIService {
 
             if (result.length) {
                 if (word['category'])
-                    word['category'].push('Disc')
+                    word['category'].push(IMAGE_TEXT_CATEGORY.DISC)
                 else
-                    word['category'] = ['Disc']
+                    word['category'] = [IMAGE_TEXT_CATEGORY.DISC]
             }
         })
 
@@ -109,7 +111,7 @@ export class AIService {
 
             for (const pnp of phoneNumberPatterns) {
                 if (pnp.test(word.word)) {
-                    word['category'] = ['PhoneNumber']
+                    word['category'] = [IMAGE_TEXT_CATEGORY.PHONE_NUMBER]
                     break
                 }
             }
