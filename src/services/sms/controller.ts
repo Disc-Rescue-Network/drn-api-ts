@@ -53,6 +53,15 @@ export class SMSController extends AppController {
             this.handleTwilioSms
         )
 
+        this.router.post(
+            '/keyword',
+            oapi.validPath(oapiPathDef({
+                requestBodySchema: schemas.TwilioSMSSchema,
+                summary: 'Respond to SMS keyword'
+            })),
+            this.handleTwilioSms
+        )
+
         this.router.put(
             '/phone-opt-in',
             oapi.validPath(oapiPathDef({
