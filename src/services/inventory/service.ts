@@ -1,6 +1,7 @@
 import Sequelize, { Op } from 'sequelize'
 import { escape as sqlEscape } from 'mysql2'
 import dayjs from 'dayjs'
+import jsonDiff from 'json-diff'
 
 import Inventory, { InventoryData } from './models/inventory'
 import Claim, { ClaimData } from './models/claim'
@@ -27,6 +28,10 @@ import mysql from '../../store/mysql'
 import socketService from '../../web/socket/service'
 import notificationLib from '../notification/lib'
 import { NOTIFICATION_TYPE } from '../notification/constant'
+
+import userLib from '../user/lib'
+import { ACTIVITY_TYPE, ACTIVITY_TARGET } from '../user/constant'
+import Activity from '../user/models/activity'
 
 import config from '../../config'
 
@@ -105,16 +110,60 @@ export class InventoryService {
         return Inventory.findByPk(id)
     }
 
-    create = async (data: InventoryData) => {
-        return Inventory.create(data)
+    create = async (
+        data: InventoryData,
+        orgCode: string,
+        user: string
+    ) => {
+        const transaction = await mysql.sequelize.transaction()
+
+        try {
+            const inventory = await Inventory.create({ ...data, orgCode }, { transaction })
+
+            await userLib.logActivity(
+                {
+                    type: ACTIVITY_TYPE.CREATE,
+                    objectId: inventory.id,
+                    objectType: ACTIVITY_TARGET.INVENTORY,
+                    orgCode,
+                    user
+                },
+                transaction
+            )
+
+            await transaction.commit()
+
+            return inventory
+        } catch(err) {
+            await transaction.rollback()
+            throw err
+        }
     }
 
-    update = async (id: number, data: Partial<InventoryData>) => {
-        const result = await Inventory.update(data, { where: { id } })
-        if (result[0])
-            return 'Record updated'
+    update = async (
+        id: number,
+        data: Partial<InventoryData>,
+        orgCode: string,
+        user: string
+    ) => {
+        const item = await Inventory.findByPk(id)
 
-        throw new NotFound('No such record to update')
+        const beforeUpdate = Object.assign({}, item.dataValues)
+
+        const afterUpdate = await item.update(data)
+
+        const diff = jsonDiff.diff(beforeUpdate, afterUpdate.dataValues)
+
+        await userLib.logActivity({
+            type: ACTIVITY_TYPE.UPDATE,
+            objectId: item.id,
+            objectType: ACTIVITY_TARGET.INVENTORY,
+            orgCode,
+            user,
+            data: { diff }
+        })
+
+        return afterUpdate
     }
 
     getUnclaimedInventory = async (phoneNumber: string) => {
@@ -163,13 +212,22 @@ export class InventoryService {
                  * admin verification. Directly mark it verified.
                  */
                 if (otp.claim.surrendered) {
-                    await otp.claim.update({
-                        verified: true,
-                    }, { transaction })
+                    await otp.claim.update({ verified: true, }, { transaction })
+
+                    const beforeUpdate = Object.assign({}, otp.claim.item.dataValues)
 
                     await otp.claim.item.update({
                         status: INVENTORY_STATUS.SURRENDERED
                     }, { transaction })
+
+                    const diff = jsonDiff.diff(beforeUpdate, otp.claim.item.dataValues)
+                    await userLib.logActivity({
+                        type: ACTIVITY_TYPE.UPDATE,
+                        objectId: otp.claim.item.id,
+                        objectType: ACTIVITY_TARGET.INVENTORY,
+                        orgCode: otp.claim.item.orgCode,
+                        data: { diff }
+                    }, transaction)
                 } else {
                     await otp.claim.update(
                         { verified: true },
@@ -317,7 +375,14 @@ export class InventoryService {
         return soString
     }
 
-    confirmPickup = async (data: { pickupId: number, scheduledOn?: string, reScheduledOn?: string }) => {
+    confirmPickup = async (
+        data: {
+            pickupId: number,
+            scheduledOn?: string,
+            reScheduledOn?: string
+        },
+        user: string
+    ) => {
         const transaction = await mysql.sequelize.transaction()
 
         try {
@@ -355,7 +420,20 @@ export class InventoryService {
                     throw new Forbidden('Pickup has already been confirmed')
 
                 await pickup.update({ scheduledOn: data.scheduledOn }, { transaction })
+
+                const beforeUpdate = Object.assign({}, pickup.claim.item.dataValues)
+
                 await pickup.claim.item.update({ status: INVENTORY_STATUS.PENDING_COURSE_PICKUP }, { transaction })
+
+                const diff = jsonDiff.diff(beforeUpdate, pickup.claim.item.dataValues)
+                await userLib.logActivity({
+                    type: ACTIVITY_TYPE.UPDATE,
+                    objectId: pickup.claim.item.id,
+                    objectType: ACTIVITY_TARGET.INVENTORY,
+                    orgCode: pickup.claim.item.orgCode,
+                    user,
+                    data: { diff }
+                }, transaction)
 
                 const soString = this.getFormattedScheduleDate(data.scheduledOn)
 
@@ -431,7 +509,7 @@ export class InventoryService {
         return new Page(result.rows, result.count, pageOptions)
     }
 
-    completePickup = async (id: number) => {
+    completePickup = async (id: number, user: string) => {
         const transaction = await mysql.sequelize.transaction()
 
         try {
@@ -465,10 +543,25 @@ export class InventoryService {
             if (!pickup.scheduledOn)
                 throw new Forbidden('Item hand-over is not allowed as pickup has not been confirmed')
 
+            const beforeUpdate = Object.assign({}, pickup.claim.item.dataValues)
+
             await pickup.claim.item.update(
-                { status: INVENTORY_STATUS.CLAIMED },
+                {
+                    status: INVENTORY_STATUS.CLAIMED,
+                    dateClaimed: new Date
+                },
                 { where: { id: pickup.claim.itemId }, transaction }
             )
+
+            const diff = jsonDiff.diff(beforeUpdate, pickup.claim.item.dataValues)
+            await userLib.logActivity({
+                type: ACTIVITY_TYPE.UPDATE,
+                objectId: pickup.claim.item.id,
+                objectType: ACTIVITY_TARGET.INVENTORY,
+                orgCode: pickup.claim.item.orgCode,
+                user,
+                data: { diff }
+            }, transaction)
 
             if (pickup.claim.email) {
                 await sendPickupCompleteEmail(pickup.claim.email, {
@@ -521,6 +614,36 @@ export class InventoryService {
             raw: true,
             nest: true
         })
+    }
+
+    findActivities = async (
+        pageOptions: PageOptions,
+        orgCode: string
+    ) => {
+        const where: any = {
+            orgCode,
+            objectType: ACTIVITY_TARGET.INVENTORY,
+        }
+
+        const query = {
+            where,
+            offset: pageOptions.offset,
+            limit: pageOptions.limit,
+            raw: true,
+            nest: true
+        }
+
+        const result = await Activity.findAndCountAll(query)
+
+        const invObjects = await Inventory.findAll({ where: { id: result.rows.map(notif => { return notif.objectId })}})
+        for (const activity of result.rows) {
+            for (const inv of invObjects) {
+                if (activity.objectId === inv.id)
+                    inv['inv'] = inv
+            }
+        }
+
+        return new Page(result.rows, result.count, pageOptions)
     }
 }
 

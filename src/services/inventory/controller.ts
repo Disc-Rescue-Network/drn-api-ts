@@ -153,6 +153,15 @@ export class InventoryController extends AppController {
             this.surrenderDisc
         )
 
+        this.router.get(
+            '/activity',
+            oapi.validPath(oapiPathDef({
+                summary: 'Get Activities'
+            })),
+            requireLogin,
+            this.findActivities
+        )
+
         return this
     }
 
@@ -176,17 +185,12 @@ export class InventoryController extends AppController {
         async (req: Request) => {
             const body = req.body
 
-            const newItem = await inventoryService.create({
-                ...body,
-                orgCode: req.auth?.payload?.org_code
-            })
-
             if (body.textImmediately) {
                 const unclaimedData = await inventoryService.getUnclaimedInventory(
                     body.phoneNumber
                 )
 
-                const optInStatus = await smslib.getOptInStatus(body.phoneNumber);
+                const optInStatus = await smslib.getOptInStatus(body.phoneNumber)
 
                 let setDateTexted = false
                 if (optInStatus === null) {
@@ -209,19 +213,26 @@ export class InventoryController extends AppController {
                 }
 
                 if (setDateTexted) {
-                    await inventoryService.update(newItem.id, {
-                        dateTexted: new Date(new Date().toISOString().split("T")[0]),
-                    })
+                    body.dateTexted = new Date(new Date().toISOString().split("T")[0])
                 }
             }
 
-            return newItem.dataValues
+            return inventoryService.create(
+                body,
+                req.auth.payload.org_code as string,
+                req.auth.payload.sub,
+            )
         }
     )
 
     update = AppController.asyncHandler(
         async (req: Request) => {
-            return inventoryService.update(parseInt(req.params.itemId), req.body)
+            return inventoryService.update(
+                parseInt(req.params.itemId),
+                req.body,
+                req.auth.payload.org_code as string,
+                req.auth.payload.sub,
+            )
         }
     )
 
@@ -254,13 +265,19 @@ export class InventoryController extends AppController {
 
     confirmPickup = AppController.asyncHandler(
         async (req: Request) => {
-            return inventoryService.confirmPickup(req.body)
+            return inventoryService.confirmPickup(
+                req.body,
+                req.auth.payload.sub,
+            )
         }
     )
 
     completePickup = AppController.asyncHandler(
         async (req: Request) => {
-            return inventoryService.completePickup(parseInt(req.params.id))
+            return inventoryService.completePickup(
+                parseInt(req.params.id),
+                req.auth.payload.sub,
+            )
         }
     )
 
@@ -270,6 +287,15 @@ export class InventoryController extends AppController {
     surrenderDisc = AppController.asyncHandler(
         async (req: Request) => {
             return inventoryService.surrenderDisc(parseInt(req.params.id))
+        }
+    )
+
+    findActivities = AppController.asyncHandler(
+        async (req: Request) => {
+            return inventoryService.findActivities(
+                plainToClass(PageOptions, req.query),
+                req.auth.payload.org_code as string
+            )
         }
     )
 }
