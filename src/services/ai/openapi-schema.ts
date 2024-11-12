@@ -7,7 +7,7 @@ export default function () {
         properties: {
             image: {
                 type: 'string',
-                format: 'base64'
+                format: 'byte'
             },
         }
     }
