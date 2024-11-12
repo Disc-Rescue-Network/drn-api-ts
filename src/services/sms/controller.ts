@@ -16,8 +16,10 @@ import { sendSms, sendVCard } from '../sms/twilio.service'
 import {
   OPT_IN_KEYWORDS,
   OPT_OUT_KEYWORDS,
+  TICKET_KEYWORD,
   formatClaimInventoryMessage,
   optInMessage,
+  ticketMessage,
 } from './sms.model';
 
 import inventoryLib from '../inventory/lib'
@@ -179,7 +181,10 @@ export class SMSController extends AppController {
 
             const testMessage = message.trim().toLowerCase()
 
-            if (OPT_OUT_KEYWORDS.includes(testMessage)) {
+            if (testMessage === TICKET_KEYWORD) {
+                await sendSms(phoneNumber, ticketMessage)
+                return 'Ticket is noted'
+            } else if (OPT_OUT_KEYWORDS.includes(testMessage)) {
                 await smsService.updatePhoneOptIn({
                     phoneNumber,
                     smsConsent: false,

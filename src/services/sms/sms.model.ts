@@ -1,3 +1,5 @@
+import config from '../../config'
+
 export const OPT_IN_KEYWORDS: string[] = [
   "start",
   "disc",
@@ -5,6 +7,8 @@ export const OPT_IN_KEYWORDS: string[] = [
   "unstop",
 ] as const;
 export const OPT_OUT_KEYWORDS: string[] = ["cancel", "stop"] as const;
+
+export const TICKET_KEYWORD: string = 'ticket';
 
 export const optInMessage = `Disc Rescue Network (DRN): We’ve found your disc! Reply "CLAIM" to consent to receive text updates about your disc, including claim instructions. Msg&Data rates may apply. Reply "STOP" to opt-out.`;
 
@@ -16,3 +20,5 @@ export const formatClaimInventoryMessage = (
     ? `Disc Rescue Network (DRN): You have ${unclaimedInventoryLength} ${discsWord} waiting to be claimed. Claim your ${discsWord}: https://app.discrescuenetwork.com`
     : `Disc Rescue Network (DRN): We do not have any discs in the system with your phone number, however, at any time you can visit https://app.discrescuenetwork.com to search the inventory for your lost plastic. Additionally, if any show up in the network, we will let you know.`;
 };
+
+export const ticketMessage = `DRN: Sorry to hear about your issue with recovering your lost disc. Please visit the link and open a ticket for our support staff to look into the issue: ${config.drnOpenTicket}`
