@@ -80,6 +80,9 @@ export class EnvConfig {
     @IsString()
     drnAdminsOrgCode: string
 
+    @IsString()
+    drnOpenTicket: string
+
     dbConfig: DatabaseConfig
 
     async init() {
@@ -120,6 +123,7 @@ export class EnvConfig {
         this.serviceName = process.env.SERVICE_NAME
 
         this.drnAdminsOrgCode = process.env.DRN_ADMINS_ORG_CODE
+        this.drnOpenTicket = process.env.DRN_OPEN_TICKET
 
         this.allowedHosts = process.env.ALLOWED_HOSTS?.split(',')
 
