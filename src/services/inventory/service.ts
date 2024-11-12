@@ -9,6 +9,7 @@ import VerificationOTP from './models/verification-otp'
 import Pickup from './models/pickup'
 import { INVENTORY_STATUS } from './constant'
 import {
+    sendClaimEmail,
     sendPickupConfirmationEmail,
     sendPickupCompleteEmail
 } from './mail'
@@ -332,6 +333,11 @@ export class InventoryService {
 
             if (data.phoneNumber)
                 await smslib.sendSMS(message, data.phoneNumber)
+            else
+                await sendClaimEmail(currentClaim.email, {
+                    discName: currentClaim.item.disc.name,
+                    courseName: currentClaim.pickup.course.name,
+                })
 
             await transaction.commit()
 
@@ -414,6 +420,7 @@ export class InventoryService {
                 throw new Forbidden('The item is to be surrendered')
 
             let message = ''
+            let soString = ''
 
             if (data.scheduledOn) {
                 if (pickup.scheduledOn)
@@ -435,8 +442,7 @@ export class InventoryService {
                     data: { diff }
                 }, transaction)
 
-                const soString = this.getFormattedScheduleDate(data.scheduledOn)
-
+                soString = this.getFormattedScheduleDate(data.scheduledOn)
                 message = `DRN: Congrats on claiming your disc! You pickup has been confirmed and scheduled for: ${soString} at ${pickup.course.name}. Text TICKET if you need to make changes or don't receive your disc.`
             }
 
@@ -451,14 +457,20 @@ export class InventoryService {
                     throw new Forbidden('Pickup is being rescheduled on same time as before')
 
                 await pickup.update({ scheduledOn: data.reScheduledOn }, { transaction })
-                const soString = this.getFormattedScheduleDate(data.reScheduledOn)
+
+                soString = this.getFormattedScheduleDate(data.reScheduledOn)
                 message = `Your pickup has been modified by the ${pickup.course.name}. Your new pickup date is ${soString}. If you need to change or adjust your pickup text Ticket to open a ticket.`
             }
 
             if (pickup.claim.email) {
                 await sendPickupConfirmationEmail(pickup.claim.email, {
+                    status: data.scheduledOn ? 'confirmed' : 'rescheduled',
                     discName: pickup.claim.item.disc.name,
-                    courseName: pickup.course.name
+                    courseName: pickup.course.name,
+                    weight: pickup.claim.item.weight,
+                    condition: pickup.claim.item.condition,
+                    pickupDate: soString.split(' @ ')[0],
+                    pickupTime: soString.split(' @ ')[1],
                 })
             } else {
                 await smslib.sendSMS(message, pickup.claim.phoneNumber)

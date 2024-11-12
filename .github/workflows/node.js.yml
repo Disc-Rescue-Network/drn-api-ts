@@ -28,6 +28,7 @@ jobs:
     - run: cp ~/.env .env
     - run: pm2 stop drn-api
     - run: npm run build
+    - run: ./copy-hbs-template.sh
     - run: RUNNER_TRACKING_ID="" && pm2 startOrReload ecosystem.config.js
     - name: Sleep for 7 seconds
       run: sleep 7s
