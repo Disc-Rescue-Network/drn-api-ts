@@ -2,6 +2,8 @@ import 'reflect-metadata'
 
 import { Type } from 'class-transformer'
 
+import config from '../config'
+
 
 export enum Order {
   ASC = 'ASC',
@@ -12,10 +14,10 @@ export class PageOptions {
   readonly order: Order = Order.ASC
 
   @Type(() => Number)
-  readonly page: number = 1
+  readonly page: number = config.defaultPage
 
   @Type(() => Number)
-  readonly pageSize: number = 10
+  readonly pageSize: number = config.defaultPageSize
 
   get offset(): number {
     return (this.page - 1) * this.pageSize
@@ -48,9 +50,9 @@ export class Page {
     this.pageSize = this.items.length <= pageOptions.pageSize ? this.items.length : pageOptions.pageSize
 
     this.totalItems = totalItems
-    this.totalPages = this.pageSize ? Math.ceil(this.totalItems / this.pageSize) : 0
+    this.totalPages = Math.ceil(this.totalItems / pageOptions.pageSize)
 
-    this.hasPreviousPage = this.page > 1
+    this.hasPreviousPage = (this.page - 1) > 1 && ((this.page - 1) <= this.totalPages)
     this.hasNextPage = this.page < this.totalPages
   }
 }

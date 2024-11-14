@@ -61,6 +61,7 @@ export class InventoryController extends AppController {
         this.router.get(
             '',
             oapi.validPath(oapiPathDef({
+                includePaginationParams: true,
                 responseData: paginatedResponse(GetInventorySchema),
                 summary: 'Get Inventory'
             })),

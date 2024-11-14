@@ -6,6 +6,8 @@ import { ERR_CODES } from '../lib/error'
 
 import { Order } from './pagination'
 
+import config from '../config'
+
 
 const searchParam = {
     in: 'query',
@@ -22,7 +24,8 @@ const paginationParams = [
         name: 'page',
         schema: {
             default: 1,
-            type: 'integer'
+            type: 'integer',
+            minimum: config.defaultPage,
         }
     },
     {
@@ -30,7 +33,8 @@ const paginationParams = [
         name: 'pageSize',
         schema: {
             default: 10,
-            type: 'integer'
+            type: 'integer',
+            minimum: config.defaultPageSize,
         }
     },
     {

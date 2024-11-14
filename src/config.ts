@@ -83,6 +83,12 @@ export class EnvConfig {
     @IsString()
     drnOpenTicket: string
 
+    @IsInt()
+    defaultPage: number = 1
+
+    @IsInt()
+    defaultPageSize: number = 10
+
     dbConfig: DatabaseConfig
 
     async init() {
