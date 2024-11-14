@@ -177,7 +177,14 @@ export class InventoryService {
         })
     }
 
-    verifyPCM = async (data: { vid: number, otp: string, tofAccepted: boolean }) => {
+    verifyPCM = async (
+        data: {
+            vid: number,
+            otp: string,
+            tofAccepted: boolean,
+            surrenderRequested?: boolean
+        }
+    ) => {
         const transaction = await mysql.sequelize.transaction()
 
         try {
@@ -203,9 +210,12 @@ export class InventoryService {
                 if (!data.tofAccepted)
                     throw new Forbidden('Phone numbers on disc and in claim do not match. You need to accept the TOF as well.')
 
-                await Claim.update(
-                    { tofAccepted: data.tofAccepted },
-                    { where: { id: otp.claimId }, transaction, validate: false }
+                await otp.claim.update(
+                    {
+                        tofAccepted: data.tofAccepted,
+                        surrendered: data.surrenderRequested ? true : false
+                    },
+                    { transaction }
                 )
             } else {
                 /*
@@ -231,7 +241,10 @@ export class InventoryService {
                     }, transaction)
                 } else {
                     await otp.claim.update(
-                        { verified: true },
+                        {
+                            verified: true,
+                            surrendered: data.surrenderRequested ? true : false
+                        },
                         { where: { id: otp.claimId }, transaction, validate: false }
                     )
                 }
@@ -634,20 +647,44 @@ export class InventoryService {
         }
     }
 
-    surrenderDisc = async (id: number) => {
-        const claim = await Claim.findByPk(id, {
-            include: [Inventory]
-        })
+    surrenderDisc = async (claimId: number) => {
+        const transaction = await mysql.sequelize.transaction()
 
-        if (!claim)
-            throw new NotFound('No such claim')
+        try {
+            const v = await VerificationOTP.findOne({
+                where: { claimId },
+                include: [
+                    {
+                        model: Claim, include: [Inventory]
+                    },
+                ],
+                transaction
+            })
 
-        if (![ INVENTORY_STATUS.UNCLAIMED ].includes(claim.item.status))
-            throw new Forbidden('Item is no longer up for surrender')
+            if (!v)
+                throw new NotFound('No such claim')
 
-        await claim.update({ surrendered: true })
+            if (![ INVENTORY_STATUS.UNCLAIMED ].includes(v.claim.item.status))
+                throw new Forbidden('Item is no longer up for surrender')
 
-        return 'Record updated'
+            const otp = generateOTP()
+
+            await v.update({ otp }, { transaction })
+
+            if (v.phoneNumberMatches)
+                await v.claim.update({ verified: false }, { transaction })
+
+            const message = `DRN: Looks like you found your disc in one of our beacons. Use code "${otp}" to verify that it's really you.`
+
+            await smslib.sendSMS(message, v.claim.phoneNumber)
+
+            await transaction.commit()
+
+            return { claim: v.claim, vid: v.id }
+        } catch(err) {
+            await transaction.rollback()
+            throw err
+        }
     }
 
     findClaimById = async (id: number) => {
