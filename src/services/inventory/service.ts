@@ -248,6 +248,38 @@ export class InventoryService {
         }
     }
 
+    resendVerificationOTP = async (claimId: number) => {
+        const v = await VerificationOTP.findOne(
+            {
+                where: { claimId },
+                include: [
+                    {
+                        model: Claim,
+                        include: [
+                            { model: Inventory }
+                        ]
+                    }
+                ],
+            }
+        )
+
+        if (!v)
+            throw new NotFound('No such verification is pending')
+
+        if (v.claim.item.status !== INVENTORY_STATUS.UNCLAIMED)
+            throw new NotFound('Disc is no longer up for claim')
+
+        const otp = generateOTP()
+
+        await v.update({ otp })
+
+        const message = `DRN: Use code "${otp}" to verify that it's really you.`
+
+        await smslib.sendSMS(message, v.claim.phoneNumber)
+
+        return { claim: v.claim, vid: v.id }
+    }
+
     claimItem = async (data: ClaimData) => {
         const transaction = await mysql.sequelize.transaction()
 

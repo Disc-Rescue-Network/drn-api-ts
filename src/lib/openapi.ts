@@ -83,6 +83,7 @@ export function oapiPathDef(def: {
     includeSearchParam?: boolean,
     includePaginationParams?: boolean,
     summary?: string,
+    parameters?: {}[],
     requestBodySchema?: {},
     examples?: {},
     responses?: {},
@@ -93,6 +94,8 @@ export function oapiPathDef(def: {
         parameters.push(...paginationParams)
     if (def.includeSearchParam)
         parameters.push(searchParam)
+    if (def.parameters)
+        parameters.push(...def.parameters)
 
     return structuredClone({
         summary: def.summary,

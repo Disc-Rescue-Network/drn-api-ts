@@ -162,6 +162,15 @@ export class InventoryController extends AppController {
             this.findActivities
         )
 
+        this.router.get(
+            '/pcm/resend-otp',
+            oapi.validPath(oapiPathDef({
+                parameters: schemas.ResendVerificationParams,
+                summary: 'Resend Verification OTP'
+            })),
+            this.resendVerificationOTP
+        )
+
         return this
     }
 
@@ -296,6 +305,12 @@ export class InventoryController extends AppController {
                 plainToClass(PageOptions, req.query),
                 req.auth.payload.org_code as string
             )
+        }
+    )
+
+    resendVerificationOTP = AppController.asyncHandler(
+        async (req: Request) => {
+            return inventoryService.resendVerificationOTP(parseInt(req.query.claimId as string))
         }
     )
 }

@@ -140,6 +140,17 @@ export default function () {
         ]
     }
 
+    const ResendVerificationParams = [
+        {
+            in: 'query',
+            name: 'claimId',
+            schema: {
+                type: 'integer'
+            },
+            required: true
+        }
+    ]
+
     return {
         CreateInventorySchema,
         UpdateInventorySchema,
@@ -151,5 +162,7 @@ export default function () {
         VerifyClaimSchema,
 
         ConfirmPickupSchema,
+
+        ResendVerificationParams,
     }
 }
