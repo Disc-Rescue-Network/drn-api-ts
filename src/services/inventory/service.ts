@@ -267,8 +267,10 @@ export class InventoryService {
 
             const prevClaim = await Claim.findOne({
                 where: {
-                    userId: data.userId,
-                    itemId: data.itemId,
+                    [Op.and]: [
+                        data.phoneNumber ? { phoneNumber: data.phoneNumber } : { email: data.email },
+                        { itemId: data.itemId },
+                    ]
                 },
                 transaction
             })

@@ -23,19 +23,8 @@ import Pickup, { PickupData } from '../../inventory/models/pickup'
                 throw Error(`Email or phone number is needed as preferred communication`)
         }
     },
-    indexes: [
-        {
-            fields: ['userId', 'itemId'],
-            unique: true
-        }
-    ]
 })
 export default class Claim extends Model {
-    @Column({
-        allowNull: false,
-    })
-    userId: number
-
     @ForeignKey(() => Inventory)
     @Column({
         allowNull: false,
