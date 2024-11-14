@@ -273,7 +273,7 @@ export class InventoryService {
 
         await v.update({ otp })
 
-        const message = `DRN: Use code "${otp}" to verify that it's really you.`
+        const message = `DRN: Looks like you found your disc in one of our beacons. Use code "${otp}" to verify that it's really you.`
 
         await smslib.sendSMS(message, v.claim.phoneNumber)
 
