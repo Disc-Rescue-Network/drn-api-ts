@@ -11,12 +11,7 @@ const logo = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAM0AAAA2CAYAAABk6R2z
 
 const claimTemplate = Handlebars.compile(fs.readFileSync(join(__dirname, 'template', 'claim.hbs'), 'utf8'))
 const pickupConfirmationTemplate = Handlebars.compile(fs.readFileSync(join(__dirname, 'template', 'confirm-pickup.hbs'), 'utf8'))
-
-const pickupCompleteTemplate = Handlebars.compile(
-    `
-    Your have picked up disc {{discName}} at {{courseName}}.
-    `
-)
+const pickupCompleteTemplate = Handlebars.compile(fs.readFileSync(join(__dirname, 'template', 'complete-pickup.hbs'), 'utf8'))
 
 const defaultMailOptions = {
     from: config.supportEmail
@@ -62,15 +57,20 @@ function sendPickupConfirmationEmail(to: string, context: {
 function sendPickupCompleteEmail(
     to: string,
     context: {
+        status: string,
         discName: string,
         courseName: string,
+        weight: number,
+        condition: string,
+        pickupDate: string,
+        pickupTime: string,
     }
 ) {
     return sendMail({
         ...defaultMailOptions,
         to,
         subject: 'Pickup is complete',
-        html: pickupCompleteTemplate(context)
+        html: pickupCompleteTemplate({ ...context, logo })
     })
 }
 

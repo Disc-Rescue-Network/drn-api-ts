@@ -402,7 +402,7 @@ export class InventoryService {
         throw new NotFound('No such record to update')
     }
 
-    getFormattedScheduleDate = (scheduledOn: string) => {
+    getFormattedScheduleDate = (scheduledOn: string | Date) => {
         let so = dayjs(scheduledOn).tz('EST')
 
         let soString = ''
@@ -609,10 +609,16 @@ export class InventoryService {
                 data: { diff }
             }, transaction)
 
+            const soString = this.getFormattedScheduleDate(pickup.scheduledOn)
             if (pickup.claim.email) {
                 await sendPickupCompleteEmail(pickup.claim.email, {
+                    status: 'completed',
                     discName: pickup.claim.item.disc.name,
                     courseName: pickup.course.name,
+                    weight: pickup.claim.item.weight,
+                    condition: pickup.claim.item.condition,
+                    pickupDate: soString.split(' @ ')[0],
+                    pickupTime: soString.split(' @ ')[1],
                 })
             } else {
                 const message = `DRN: Lost discs finding their way home are why we do this! Congrats on bringing your ${pickup.claim.item.disc.name} home from ${pickup.course.name}. Text TICKET if there are any issues.`
