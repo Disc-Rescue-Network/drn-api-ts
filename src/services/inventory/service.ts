@@ -612,7 +612,7 @@ export class InventoryService {
             const soString = this.getFormattedScheduleDate(pickup.scheduledOn)
             if (pickup.claim.email) {
                 await sendPickupCompleteEmail(pickup.claim.email, {
-                    status: 'completed',
+                    status: 'complete',
                     discName: pickup.claim.item.disc.name,
                     courseName: pickup.course.name,
                     weight: pickup.claim.item.weight,
