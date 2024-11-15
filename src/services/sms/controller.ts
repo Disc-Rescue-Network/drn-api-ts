@@ -189,15 +189,17 @@ export class SMSController extends AppController {
 
         const twilioResponse = new twiml.MessagingResponse()
 
+        res.type('text/xml')
+
         if (textMessage === TICKET_KEYWORD) {
-            return res.type('text/xml').send(twilioResponse.message(ticketMessage).toString())
+            return res.send(twilioResponse.message(ticketMessage).toString())
         } else if (OPT_OUT_KEYWORDS.includes(textMessage)) {
             await smsService.updatePhoneOptIn({
                 phoneNumber,
                 smsConsent: false,
             })
 
-            return 'Successfully opted out of SMS'
+            return res.send(twilioResponse.message('Successfully opted out of SMS').toString())
         } else {
             const optInStatus = await lib.getOptInStatus(phoneNumber)
             if (OPT_IN_KEYWORDS.includes(textMessage)) {
@@ -234,7 +236,7 @@ export class SMSController extends AppController {
 
         responseMessage = formatClaimInventoryMessage(currentInventoryForUser.length)
 
-        return res.type('text/xml').send(twilioResponse.message(responseMessage).toString())
+        return res.send(twilioResponse.message(responseMessage).toString())
     }
 }
 

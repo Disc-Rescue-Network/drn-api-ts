@@ -9,7 +9,7 @@ import VerificationOTP from './models/verification-otp'
 import Pickup from './models/pickup'
 import { INVENTORY_STATUS } from './constant'
 import {
-    sendClaimEmail,
+    sendPCMVerificationEmail,
     sendPickupConfirmationEmail,
     sendPickupCompleteEmail
 } from './mail'
@@ -324,16 +324,15 @@ export class InventoryService {
 
             const claim = await Claim.create(data, { transaction, include: Pickup })
 
-            let message = ''
             let v: VerificationOTP
+
+            const otp = generateOTP()
 
             /*
              * If the PCM is phone number and matches the phone number on the
              * disc, no admin verification needed
              */
             if (data.phoneNumber) {
-                const otp = generateOTP()
-
                 if (!item.phoneNumber || data.phoneNumber !== item.phoneNumber) {
                     v = await VerificationOTP.create({
                         claimId: claim.id,
@@ -346,8 +345,11 @@ export class InventoryService {
                         phoneNumberMatches: true
                     }, { transaction })
                 }
-
-                message = `DRN: Looks like you found your disc in one of our beacons. Use code "${otp}" to verify that it's really you.`
+            } else {
+                v = await VerificationOTP.create({
+                    claimId: claim.id,
+                    otp
+                }, { transaction })
             }
 
             const currentClaim = await Claim.findByPk(
@@ -378,13 +380,18 @@ export class InventoryService {
                 transaction
             )
 
-            if (data.phoneNumber)
-                await smslib.sendSMS(message, data.phoneNumber)
-            else
-                await sendClaimEmail(currentClaim.email, {
+            if (data.phoneNumber) {
+                await smslib.sendSMS(
+                    `DRN: Looks like you found your disc in one of our beacons. Use code "${otp}" to verify that it's really you.`,
+                    data.phoneNumber
+                )
+            } else {
+                await sendPCMVerificationEmail(currentClaim.email, {
                     discName: currentClaim.item.disc.name,
                     courseName: currentClaim.pickup.course.name,
+                    otp
                 })
+            }
 
             await transaction.commit()
 
@@ -397,7 +404,7 @@ export class InventoryService {
                 }
             )
 
-            return { claim, vid: v ? v.id : undefined }
+            return { claim, vid: v.id }
         } catch(err) {
             await transaction.rollback()
             throw err
