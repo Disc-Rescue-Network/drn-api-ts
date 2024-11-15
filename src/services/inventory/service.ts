@@ -11,7 +11,8 @@ import { INVENTORY_STATUS } from './constant'
 import {
     sendPCMVerificationEmail,
     sendPickupConfirmationEmail,
-    sendPickupCompleteEmail
+    sendPickupCompleteEmail,
+    sendSurrenderEmail
 } from './mail'
 
 import Disc from '../disc/models/disc'
@@ -662,7 +663,19 @@ export class InventoryService {
                 where: { claimId },
                 include: [
                     {
-                        model: Claim, include: [Inventory]
+                        model: Claim,
+                        include: [
+                            {
+                                model: Inventory,
+                                include: [
+                                    Disc
+                                ]
+                            },
+                            {
+                                model: Pickup,
+                                include: [Course]
+                            }
+                        ]
                     },
                 ],
                 transaction
@@ -681,9 +694,18 @@ export class InventoryService {
             if (v.phoneNumberMatches)
                 await v.claim.update({ verified: false }, { transaction })
 
-            const message = `DRN: Looks like you found your disc in one of our beacons. Use code "${otp}" to verify that it's really you.`
-
-            await smslib.sendSMS(message, v.claim.phoneNumber)
+            if (v.claim.phoneNumber)
+                await smslib.sendSMS(
+                    `DRN: Looks like you found your disc in one of our beacons. Use code "${otp}" to verify that it's really you.`,
+                    v.claim.phoneNumber
+                )
+            else {
+                await sendSurrenderEmail(v.claim.email, {
+                    discName: v.claim.item.disc.name,
+                    courseName: v.claim.pickup.course.name,
+                    otp
+                })
+            }
 
             await transaction.commit()
 

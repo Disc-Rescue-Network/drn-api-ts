@@ -12,6 +12,7 @@ const logo = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAM0AAAA2CAYAAABk6R2z
 const pcmVerificationTemplate = Handlebars.compile(fs.readFileSync(join(__dirname, 'template', 'verify-pcm.hbs'), 'utf8'))
 const pickupConfirmationTemplate = Handlebars.compile(fs.readFileSync(join(__dirname, 'template', 'confirm-pickup.hbs'), 'utf8'))
 const pickupCompleteTemplate = Handlebars.compile(fs.readFileSync(join(__dirname, 'template', 'complete-pickup.hbs'), 'utf8'))
+const surrenderTemplate = Handlebars.compile(fs.readFileSync(join(__dirname, 'template', 'surrender.hbs'), 'utf8'))
 
 const defaultMailOptions = {
     from: config.supportEmail
@@ -78,8 +79,25 @@ function sendPickupCompleteEmail(
     })
 }
 
+function sendSurrenderEmail(
+    to: string,
+    context: {
+        discName: string,
+        courseName: string,
+        otp: string,
+    }
+) {
+    return sendMail({
+        ...defaultMailOptions,
+        to,
+        subject: 'Disc Surrender',
+        html: surrenderTemplate({ ...context, logo })
+    })
+}
+
 export {
     sendPCMVerificationEmail,
     sendPickupConfirmationEmail,
-    sendPickupCompleteEmail
+    sendPickupCompleteEmail,
+    sendSurrenderEmail
 }
