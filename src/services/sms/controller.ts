@@ -39,7 +39,7 @@ export class SMSController extends AppController {
 
         smsService.init()
 
-        this.router.get('/phone-opt-in/twilio/vcf', async (_, res) => {
+        this.router.get('/phone-opt-in/vcf', async (_, res) => {
             res.setHeader('Content-Type', 'text/vcard')
             res.send(vcard)
         })
@@ -214,6 +214,12 @@ export class SMSController extends AppController {
                         "DRN: Save our contact to make sure you get all the latest updates from Disc Rescue Network!"
                     )
                 }
+
+                const currentInventoryForUser = await inventoryLib.getUnclaimedInventory(
+                    phoneNumber
+                )
+
+                responseMessage = formatClaimInventoryMessage(currentInventoryForUser.length)
             } else {
                 if (!optInStatus) {
                     await smsService.updatePhoneOptIn({
@@ -221,20 +227,12 @@ export class SMSController extends AppController {
                         smsConsent: false,
                     })
 
-                    await sendSms(phoneNumber, optInMessage)
-
-                    throw new Forbidden('You have not opted for SMS. Please check SMS to opt in.')
+                    responseMessage = optInMessage
                 } else if (!optInStatus.smsConsent) {
-                    throw new Forbidden('You have not opted for SMS')
+                    responseMessage = 'You have not opted for SMS'
                 }
             }
         }
-
-        const currentInventoryForUser = await inventoryLib.getUnclaimedInventory(
-            phoneNumber
-        )
-
-        responseMessage = formatClaimInventoryMessage(currentInventoryForUser.length)
 
         return res.send(twilioResponse.message(responseMessage).toString())
     }

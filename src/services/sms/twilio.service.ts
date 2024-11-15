@@ -35,28 +35,28 @@ export const sendSms = async (
 };
 
 /**
- * send drn vcard through twilio
+ * Send drn vcard through twilio
  *
  * @param {string} toPhoneNumber phone number to send to
  * @param {string} messageBody text message to send with the vcard
- * @returns `undefined` if succesful, else error `object`
+ * @returns `undefined`
  */
 export const sendVCard = async (
-  toPhoneNumber: string,
-  messageBody: string
-): Promise<void | { errors: object[] }> => {
-  try {
-    const messageInstance = await twilioClient.messages.create({
-      body: messageBody,
-      from: config.twilioSendFrom,
-      to: toPhoneNumber,
-      mediaUrl: [
-        "https://drn-api-v2.discrescuenetwork.com/phone-opt-ins/twilio/vcf",
-      ],
-    });
-    console.log("messageInstance", messageInstance);
-  } catch (e) {
-    console.error(e, "twilio sendsms err");
-    return { errors: [] };
-  }
+    toPhoneNumber: string,
+    messageBody: string
+) => {
+    try {
+        const messageInstance = await twilioClient.messages.create({
+            body: messageBody,
+            from: config.twilioSendFrom,
+            to: toPhoneNumber,
+            mediaUrl: [
+                config.twilio_vcf_url,
+            ],
+        });
+
+        console.log('Message Instance', messageInstance);
+    } catch (e) {
+        console.error('Error sending vcard', e);
+    }
 };
