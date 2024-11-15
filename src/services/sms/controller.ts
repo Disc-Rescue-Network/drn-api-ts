@@ -171,74 +171,71 @@ export class SMSController extends AppController {
         }
     )
 
-    handleTwilioSms = AppController.asyncHandler(
-        async (req: Request) => {
-            const isTwilio = twilio.validateRequest(
-                config.twilioAuthToken,
-                req.headers["x-twilio-signature"] as string,
-                config.twilioWebhookURL,
-                req.body
-            )
+    handleTwilioSms = async (req: Request, res: Response) => {
+        const isTwilio = twilio.validateRequest(
+            config.twilioAuthToken,
+            req.headers['x-twilio-signature'] as string,
+            config.twilioWebhookURL,
+            req.body
+        )
 
-            if (!isTwilio)
-                throw new Forbidden('Invalid twilio signature')
+        if (!isTwilio)
+            throw new Forbidden('Invalid twilio signature')
 
-            const phoneNumber = req.body.From
-            const message = req.body.Body
+        const phoneNumber = req.body.From
+        const textMessage = req.body.Body.trim().toLowerCase()
 
-            let responseMessage: string = "Thanks for the message - Disc Rescue Network"
+        let responseMessage: string = 'Thanks for the message - Disc Rescue Network'
 
-            const testMessage = message.trim().toLowerCase()
+        const twilioResponse = new twiml.MessagingResponse()
 
-            if (testMessage === TICKET_KEYWORD) {
-                await sendSms(phoneNumber, ticketMessage)
-                return 'Ticket is noted'
-            } else if (OPT_OUT_KEYWORDS.includes(testMessage)) {
-                await smsService.updatePhoneOptIn({
-                    phoneNumber,
-                    smsConsent: false,
-                })
+        if (textMessage === TICKET_KEYWORD) {
+            return res.type('text/xml').send(twilioResponse.message(ticketMessage).toString())
+        } else if (OPT_OUT_KEYWORDS.includes(textMessage)) {
+            await smsService.updatePhoneOptIn({
+                phoneNumber,
+                smsConsent: false,
+            })
 
-                return 'Successfully opted out of SMS'
+            return 'Successfully opted out of SMS'
+        } else {
+            const optInStatus = await lib.getOptInStatus(phoneNumber)
+            if (OPT_IN_KEYWORDS.includes(textMessage)) {
+                if (optInStatus && !optInStatus.smsConsent) {
+                    await smsService.updatePhoneOptIn({
+                        phoneNumber,
+                        smsConsent: true,
+                    })
+
+                    await sendVCard(
+                        phoneNumber,
+                        "DRN: Save our contact to make sure you get all the latest updates from Disc Rescue Network!"
+                    )
+                }
             } else {
-                const optInStatus = await lib.getOptInStatus(phoneNumber)
-                if (OPT_IN_KEYWORDS.includes(testMessage)) {
-                    if (optInStatus && !optInStatus.smsConsent) {
-                        await smsService.updatePhoneOptIn({
-                            phoneNumber,
-                            smsConsent: true,
-                        })
+                if (!optInStatus) {
+                    await smsService.updatePhoneOptIn({
+                        phoneNumber,
+                        smsConsent: false,
+                    })
 
-                        await sendVCard(
-                            phoneNumber,
-                            "DRN: Save our contact to make sure you get all the latest updates from Disc Rescue Network!"
-                        )
-                    }
-                } else {
-                    if (!optInStatus) {
-                        await smsService.updatePhoneOptIn({
-                            phoneNumber,
-                            smsConsent: false,
-                        })
+                    await sendSms(phoneNumber, optInMessage)
 
-                        await sendSms(phoneNumber, optInMessage)
-
-                        throw new Forbidden('You have not opted for SMS. Please check SMS to opt in.')
-                    } else if (!optInStatus.smsConsent) {
-                        throw new Forbidden('You have not opted for SMS')
-                    }
+                    throw new Forbidden('You have not opted for SMS. Please check SMS to opt in.')
+                } else if (!optInStatus.smsConsent) {
+                    throw new Forbidden('You have not opted for SMS')
                 }
             }
-
-            const currentInventoryForUser = await inventoryLib.getUnclaimedInventory(
-                phoneNumber
-            )
-            responseMessage = formatClaimInventoryMessage(currentInventoryForUser.length)
-
-            const twilioResponse = new twiml.MessagingResponse().message(responseMessage)
-            return { xml: twilioResponse.toString() }
         }
-    )
+
+        const currentInventoryForUser = await inventoryLib.getUnclaimedInventory(
+            phoneNumber
+        )
+
+        responseMessage = formatClaimInventoryMessage(currentInventoryForUser.length)
+
+        return res.type('text/xml').send(twilioResponse.message(responseMessage).toString())
+    }
 }
 
 
