@@ -298,7 +298,7 @@ export class InventoryService {
 
         const message = `DRN: Looks like you found your disc in one of our beacons. Use code "${otp}" to verify that it's really you.`
 
-        await smslib.sendSMS(message, v.claim.phoneNumber)
+        await smslib.sendSMS(v.claim.phoneNumber, message)
 
         return { claim: v.claim, vid: v.id }
     }
@@ -392,8 +392,8 @@ export class InventoryService {
 
             if (data.phoneNumber) {
                 await smslib.sendSMS(
+                    data.phoneNumber,
                     `DRN: Looks like you found your disc in one of our beacons. Use code "${otp}" to verify that it's really you.`,
-                    data.phoneNumber
                 )
             } else {
                 await sendPCMVerificationEmail(currentClaim.email, {
@@ -537,7 +537,7 @@ export class InventoryService {
                     pickupTime: soString.split(' @ ')[1],
                 })
             } else {
-                await smslib.sendSMS(message, pickup.claim.phoneNumber)
+                await smslib.sendSMS(pickup.claim.phoneNumber, message)
             }
 
             await transaction.commit()
@@ -652,7 +652,7 @@ export class InventoryService {
                 })
             } else {
                 const message = `DRN: Lost discs finding their way home are why we do this! Congrats on bringing your ${pickup.claim.item.disc.name} home from ${pickup.course.name}. Text TICKET if there are any issues.`
-                await smslib.sendSMS(message, pickup.claim.phoneNumber)
+                await smslib.sendSMS(pickup.claim.phoneNumber, message)
             }
 
             await transaction.commit()

@@ -1,4 +1,4 @@
-import twilio from "twilio"
+import twilio from 'twilio'
 import { Op } from 'sequelize'
 
 import PhoneOptIn from './models/phone-opt-in'
@@ -18,7 +18,7 @@ export class SMSlib {
         })
     }
 
-    sendSMS = async (body: string, to: string) => {
+    sendSMS = async (to: string, body: string) => {
         try {
             const messageInstance = await twilioClient.messages.create({
                 to,
@@ -34,6 +34,30 @@ export class SMSlib {
             }
         } catch (e) {
             throw new InternalServerError('Failed to send SMS')
+        }
+    }
+
+    sendVCard = async (
+        to: string,
+        body: string
+    ) => {
+        try {
+            const messageInstance = await twilioClient.messages.create({
+                to,
+                body,
+                from: config.twilioSendFrom,
+                mediaUrl: [
+                    config.twilio_vcf_url,
+                ],
+            });
+
+            console.log(`Message Instance: ${JSON.stringify(messageInstance, null, 4)}`)
+
+            if (messageInstance.errorCode !== null) {
+                throw new InternalServerError('Failed to send vcard')
+            }
+        } catch (e) {
+            throw new InternalServerError('Failed to send vcard')
         }
     }
 }

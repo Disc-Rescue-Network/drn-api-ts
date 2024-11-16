@@ -11,7 +11,6 @@ import inventoryService from './service'
 import generate from './openapi-schema'
 
 import smslib from '../sms/lib'
-import { sendSms } from '../sms/twilio.service'
 import { formatClaimInventoryMessage, optInMessage } from '../sms/sms.model'
 
 import { requireLogin, requireOrgAuth } from '../../web/middleware'
@@ -205,20 +204,17 @@ export class InventoryController extends AppController {
                 let setDateTexted = false
                 if (optInStatus === null) {
                     // request opt in
-                    const smsResponse = await sendSms(
+                    await smslib.sendSMS(
                         body.phoneNumber,
                         optInMessage
                     )
-                    setDateTexted = !smsResponse === true
+                    setDateTexted = true
                 } else if (optInStatus.smsConsent) {
                     // user is opted in, send text
-                    const smsResponse = await sendSms(
+                    await smslib.sendSMS(
                         body.phoneNumber,
                         formatClaimInventoryMessage(unclaimedData.length)
                     )
-                    setDateTexted = !smsResponse === true
-                } else {
-                    // phone is opted out
                     setDateTexted = true
                 }
 

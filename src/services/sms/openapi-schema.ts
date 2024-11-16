@@ -10,10 +10,13 @@ export default function () {
     const schemaManager = new SchemaManager
     const strategy = new OpenApiStrategy
 
-    const CreateSMSLogSchema = schemaManager.generate(SMSLogs, strategy, {
+    const SendSMSSchema = schemaManager.generate(SMSLogs, strategy, {
         exclude: ['sentAt', ...config.autoAttributes],
         associations: false
     })
+    SendSMSSchema.properties['initialText'] = {
+        type: 'boolean'
+    }
 
     const UpdatePhoneOptInSchema = schemaManager.generate(PhoneOptIn, strategy, {
         exclude: config.autoAttributes,
@@ -39,7 +42,7 @@ export default function () {
     }
 
     return {
-        CreateSMSLogSchema,
+        SendSMSSchema,
         UpdatePhoneOptInSchema,
         GetPhoneOptInSchema,
         TwilioSMSSchema,

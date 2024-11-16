@@ -2,19 +2,19 @@ import { BelongsTo, ForeignKey, DataType, Column, Table, Model, Length } from 's
 
 import { StoreLib } from '../../../store/lib'
 
-import DiscMold from '../../disc/models/disc'
+import Inventory from '../../inventory/models/inventory'
 
 
 @Table
 export default class SMSLogs extends Model {
-    @ForeignKey(() => DiscMold)
+    @ForeignKey(() => Inventory)
     @Column({
         allowNull: false
     })
-    discId: number
+    itemId: number
 
-    @BelongsTo(() => DiscMold)
-    disc?: DiscMold
+    @BelongsTo(() => Inventory)
+    item?: Inventory
 
     @Length({
         msg: 'length needs to be between 1 and 160',

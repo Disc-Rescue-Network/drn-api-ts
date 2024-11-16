@@ -4,7 +4,7 @@ import twilio, { twiml } from 'twilio'
 import { plainToClass } from 'class-transformer'
 
 import AppController from '../../lib/app-controller'
-import { Forbidden, InternalServerError } from '../../lib/error'
+import { Forbidden } from '../../lib/error'
 import oapi, { oapiPathDef, paginatedResponse } from '../../lib/openapi'
 import { PageOptions } from '../../lib/pagination'
 
@@ -12,7 +12,7 @@ import smsService from './service'
 import generate from './openapi-schema'
 import lib from './lib'
 
-import { sendSms, sendVCard } from '../sms/twilio.service'
+import smslib from '../sms/lib'
 import {
   OPT_IN_KEYWORDS,
   OPT_OUT_KEYWORDS,
@@ -75,10 +75,10 @@ export class SMSController extends AppController {
             '',
             requireLogin,
             oapi.validPath(oapiPathDef({
-                requestBodySchema: schemas.CreateSMSLogSchema,
-                summary: 'Opt In To SMS'
+                requestBodySchema: schemas.SendSMSSchema,
+                summary: 'Send SMS'
             })),
-            this.postSms
+            this.postSMS
         )
 
         this.router.get(
@@ -109,9 +109,16 @@ export class SMSController extends AppController {
         }
     )
 
-    postSms = AppController.asyncHandler(
+    postSMS = AppController.asyncHandler(
         async (req: Request) => {
-            const reqBody = req.body
+            const reqBody: {
+                recipientPhone: string,
+                message: string,
+                initialText: boolean,
+                itemId: number,
+                sentBy: string
+            } = req.body
+
             if (reqBody.initialText) {
                 const optInStatus = await lib.getOptInStatus(reqBody.recipientPhone)
 
@@ -119,46 +126,32 @@ export class SMSController extends AppController {
 
                 if (optInStatus === null) {
                     // request opt in
-                    const smsResponse = await sendSms(
+                    await smslib.sendSMS(
                         reqBody.recipientPhone,
                         optInMessage
                     )
-                    setDateTexted = !smsResponse === true
+
+                    setDateTexted = true
                 } else if (optInStatus.smsConsent) {
                     // user is opted in, send text
-                    const sendSmsResponse = await sendSms(
+                    await smslib.sendSMS(
                         reqBody.recipientPhone,
                         reqBody.message
                     )
 
-                    setDateTexted = !sendSmsResponse === true
-
-                    if (
-                        typeof sendSmsResponse === "object" &&
-                        "errors" in sendSmsResponse
-                    ) {
-                        throw new InternalServerError('Error sending sms')
-                    }
-                } else {
-                    // phone is opted out
                     setDateTexted = true
                 }
 
                 if (setDateTexted) {
-                    await inventoryLib.update(reqBody.discId, {
+                    await inventoryLib.update(reqBody.itemId, {
                         dateTexted: new Date(new Date().toISOString().split("T")[0]),
                     })
                 }
             } else {
-                // send the text
-                const sendSmsResponse = await sendSms(
+                await smslib.sendSMS(
                     reqBody.recipientPhone,
                     reqBody.message
                 )
-
-                if (typeof sendSmsResponse === "object" && "errors" in sendSmsResponse) {
-                    throw new InternalServerError('Error sending sms')
-                }
 
                 // Log the custom SMS
                 await smsService.insertSmsLog({
@@ -167,7 +160,7 @@ export class SMSController extends AppController {
                 })
             }
 
-            return 'Successfully opted for SMS'
+            return 'SMS sent successfully'
         }
     )
 
@@ -211,7 +204,7 @@ export class SMSController extends AppController {
                         smsConsent: true,
                     })
 
-                    await sendVCard(
+                    await smslib.sendVCard(
                         phoneNumber,
                         'DRN: Save our contact to make sure you get all the latest updates from Disc Rescue Network!'
                     )
