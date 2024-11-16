@@ -148,24 +148,33 @@ export class InventoryService {
         orgCode: string,
         user: string
     ) => {
-        const item = await Inventory.findByPk(id)
+        const transaction = await mysql.sequelize.transaction()
 
-        const beforeUpdate = Object.assign({}, item.dataValues)
+        try {
+            const item = await Inventory.findByPk(id, { transaction })
 
-        const afterUpdate = await item.update(data)
+            const beforeUpdate = Object.assign({}, item.dataValues)
 
-        const diff = jsonDiff.diff(beforeUpdate, afterUpdate.dataValues)
+            const afterUpdate = await item.update(data, { transaction })
 
-        await userLib.logActivity({
-            type: ACTIVITY_TYPE.UPDATE,
-            objectId: item.id,
-            objectType: ACTIVITY_TARGET.INVENTORY,
-            orgCode,
-            user,
-            data: { diff }
-        })
+            const diff = jsonDiff.diff(beforeUpdate, afterUpdate.dataValues)
 
-        return afterUpdate
+            await userLib.logActivity({
+                type: ACTIVITY_TYPE.UPDATE,
+                objectId: item.id,
+                objectType: ACTIVITY_TARGET.INVENTORY,
+                orgCode,
+                user,
+                data: { diff }
+            }, transaction)
+
+            await transaction.commit()
+
+            return afterUpdate
+        } catch(err) {
+            await transaction.rollback()
+            throw err
+        }
     }
 
     getUnclaimedInventory = async (phoneNumber: string) => {
