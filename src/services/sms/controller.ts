@@ -139,6 +139,12 @@ export class SMSController extends AppController {
                         reqBody.message
                     )
 
+                    // Log the custom SMS
+                    await smsService.insertSmsLog({
+                        ...reqBody,
+                        sentAt: new Date(),
+                    })
+
                     setDateTexted = true
                 }
 
