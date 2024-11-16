@@ -38,7 +38,8 @@ export class SMSService {
     }
 
     updatePhoneOptIn = async (data: Partial<PhoneOptInData>) => {
-        return PhoneOptIn.upsert(data)
+        const result = await PhoneOptIn.upsert(data)
+        return result[0]
     }
 
     insertSmsLog = async (data: SMSLogsData) => {
