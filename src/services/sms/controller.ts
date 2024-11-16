@@ -172,15 +172,17 @@ export class SMSController extends AppController {
     )
 
     handleTwilioSms = async (req: Request, res: Response) => {
-        const isTwilio = twilio.validateRequest(
-            config.twilioAuthToken,
-            req.headers['x-twilio-signature'] as string,
-            config.twilioWebhookURL,
-            req.body
-        )
+        if (process.env.NODE_ENV !== 'local') {
+            const isTwilio = twilio.validateRequest(
+                config.twilioAuthToken,
+                req.headers['x-twilio-signature'] as string,
+                config.twilioWebhookURL,
+                req.body
+            )
 
-        if (!isTwilio)
-            throw new Forbidden('Invalid twilio signature')
+            if (!isTwilio)
+                throw new Forbidden('Invalid twilio signature')
+        }
 
         const phoneNumber = req.body.From
         const textMessage = req.body.Body.trim().toLowerCase()
