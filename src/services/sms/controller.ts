@@ -28,7 +28,7 @@ import config from '../../config'
 
 import { requireLogin } from '../../web/middleware'
 
-import { vcard } from "../../vcard"
+import { vcard } from '../../vcard'
 
 
 export class SMSController extends AppController {
@@ -203,7 +203,7 @@ export class SMSController extends AppController {
         } else {
             const optInStatus = await lib.getOptInStatus(phoneNumber)
             if (OPT_IN_KEYWORDS.includes(textMessage)) {
-                if (optInStatus && !optInStatus.smsConsent) {
+                if (!optInStatus || (optInStatus && !optInStatus.smsConsent)) {
                     await smsService.updatePhoneOptIn({
                         phoneNumber,
                         smsConsent: true,
@@ -211,26 +211,17 @@ export class SMSController extends AppController {
 
                     await sendVCard(
                         phoneNumber,
-                        "DRN: Save our contact to make sure you get all the latest updates from Disc Rescue Network!"
+                        'DRN: Save our contact to make sure you get all the latest updates from Disc Rescue Network!'
                     )
                 }
 
-                const currentInventoryForUser = await inventoryLib.getUnclaimedInventory(
-                    phoneNumber
-                )
-
+                const currentInventoryForUser = await inventoryLib.getUnclaimedInventory(phoneNumber)
                 responseMessage = formatClaimInventoryMessage(currentInventoryForUser.length)
             } else {
-                if (!optInStatus) {
-                    await smsService.updatePhoneOptIn({
-                        phoneNumber,
-                        smsConsent: false,
-                    })
-
+                if (!optInStatus)
                     responseMessage = optInMessage
-                } else if (!optInStatus.smsConsent) {
+                else if (!optInStatus.smsConsent)
                     responseMessage = 'You have not opted for SMS'
-                }
             }
         }
 
