@@ -8,6 +8,8 @@ import { Forbidden } from '../../lib/error'
 import oapi, { oapiPathDef, paginatedResponse } from '../../lib/openapi'
 import { PageOptions } from '../../lib/pagination'
 
+import { SMSLogsData } from './models/sms-logs'
+
 import smsService from './service'
 import generate from './openapi-schema'
 import lib from './lib'
@@ -20,7 +22,7 @@ import {
   formatClaimInventoryMessage,
   optInMessage,
   ticketMessage,
-} from './sms.model';
+} from './message'
 
 import inventoryLib from '../inventory/lib'
 
@@ -111,12 +113,9 @@ export class SMSController extends AppController {
 
     postSMS = AppController.asyncHandler(
         async (req: Request) => {
-            const reqBody: {
-                recipientPhone: string,
-                message: string,
+            const reqBody: Omit<SMSLogsData, 'sentAt'> & {
                 initialText: boolean,
-                itemId: number,
-                sentBy: string
+                sentAt: Date
             } = req.body
 
             if (reqBody.initialText) {
@@ -133,17 +132,17 @@ export class SMSController extends AppController {
 
                     setDateTexted = true
                 } else if (optInStatus.smsConsent) {
+                    // Log the custom SMS
+                    await lib.insertSmsLog({
+                        ...reqBody,
+                        sentAt: new Date(),
+                    })
+
                     // user is opted in, send text
                     await smslib.sendSMS(
                         reqBody.recipientPhone,
                         reqBody.message
                     )
-
-                    // Log the custom SMS
-                    await smsService.insertSmsLog({
-                        ...reqBody,
-                        sentAt: new Date(),
-                    })
 
                     setDateTexted = true
                 }
@@ -154,16 +153,16 @@ export class SMSController extends AppController {
                     })
                 }
             } else {
+                // Log the custom SMS
+                await lib.insertSmsLog({
+                    ...reqBody,
+                    sentAt: new Date(),
+                })
+
                 await smslib.sendSMS(
                     reqBody.recipientPhone,
                     reqBody.message
                 )
-
-                // Log the custom SMS
-                await smsService.insertSmsLog({
-                    ...reqBody,
-                    sentAt: new Date(),
-                })
             }
 
             return 'SMS sent successfully'

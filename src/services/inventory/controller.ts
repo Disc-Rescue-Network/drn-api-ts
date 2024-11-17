@@ -11,7 +11,7 @@ import inventoryService from './service'
 import generate from './openapi-schema'
 
 import smslib from '../sms/lib'
-import { formatClaimInventoryMessage, optInMessage } from '../sms/sms.model'
+import { formatClaimInventoryMessage, optInMessage } from '../sms/message'
 
 import { requireLogin, requireOrgAuth } from '../../web/middleware'
 
@@ -171,6 +171,15 @@ export class InventoryController extends AppController {
             this.resendVerificationOTP
         )
 
+        this.router.post(
+            '/sms',
+            oapi.validPath(oapiPathDef({
+                requestBodySchema: schemas.SendSMSSchema,
+                summary: 'Send SMS To Inventory Phone Number'
+            })),
+            this.sendSMS
+        )
+
         return this
     }
 
@@ -308,6 +317,12 @@ export class InventoryController extends AppController {
     resendVerificationOTP = AppController.asyncHandler(
         async (req: Request) => {
             return inventoryService.resendVerificationOTP(parseInt(req.query.claimId as string))
+        }
+    )
+
+    sendSMS = AppController.asyncHandler(
+        async (req: Request) => {
+            return inventoryService.sendSMS(req.body)
         }
     )
 }

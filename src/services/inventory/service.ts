@@ -24,6 +24,8 @@ import { generateOTP } from '../../lib/shared'
 import { Forbidden, NotFound, ConflictError } from '../../lib/error'
 
 import smslib from '../sms/lib'
+import { optInMessage } from '../sms/message'
+import { SMSLogsData } from '../sms/models/sms-logs'
 
 import mysql from '../../store/mysql'
 
@@ -771,6 +773,82 @@ export class InventoryService {
         }
 
         return new Page(result.rows, result.count, pageOptions)
+    }
+
+    sendSMS = async (
+        data: Omit<SMSLogsData, 'sentAt' | 'recipientPhone'> & {
+            initialText: boolean,
+            sentAt: Date
+        }
+    ) => {
+        const transaction = await mysql.sequelize.transaction()
+
+        try {
+            const item = await Inventory.findByPk(data.itemId, { transaction })
+            if (!item)
+                throw new NotFound('No such inventory item')
+
+            const recipientPhone = item.phoneNumber
+
+            if (data.initialText) {
+                const optInStatus = await smslib.getOptInStatus(recipientPhone, transaction)
+
+                let setDateTexted = false
+
+                if (optInStatus === null) {
+                    // request opt in
+                    await smslib.sendSMS(
+                        recipientPhone,
+                        optInMessage
+                    )
+
+                    setDateTexted = true
+                } else if (optInStatus.smsConsent) {
+                    // Log the custom SMS
+                    await smslib.insertSmsLog({
+                        ...data,
+                        recipientPhone,
+                        sentAt: new Date(),
+                    }, transaction)
+
+                    // user is opted in, send text
+                    await smslib.sendSMS(
+                        recipientPhone,
+                        data.message
+                    )
+
+                    setDateTexted = true
+                }
+
+                if (setDateTexted) {
+                    await Inventory.update(
+                        {
+                            dateTexted: new Date(new Date().toISOString().split('T')[0]),
+                        },
+                        { where: { id: data.itemId }, transaction }
+                    )
+                }
+            } else {
+                // Log the custom SMS
+                await smslib.insertSmsLog({
+                    ...data,
+                    recipientPhone,
+                    sentAt: new Date(),
+                }, transaction)
+
+                await smslib.sendSMS(
+                    recipientPhone,
+                    data.message
+                )
+            }
+
+            await transaction.commit()
+
+            return 'SMS sent successfully'
+        } catch(err) {
+            await transaction.rollback()
+            throw err
+        }
     }
 }
 

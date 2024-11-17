@@ -1,7 +1,6 @@
 import { Op } from 'sequelize'
 
 import PhoneOptIn, { PhoneOptInData } from './models/phone-opt-in'
-import SMSLogs, { SMSLogsData } from './models/sms-logs'
 
 import { Page, PageOptions } from '../../lib/pagination'
 
@@ -40,10 +39,6 @@ export class SMSService {
     updatePhoneOptIn = async (data: Partial<PhoneOptInData>) => {
         const result = await PhoneOptIn.upsert(data)
         return result[0]
-    }
-
-    insertSmsLog = async (data: SMSLogsData) => {
-        return SMSLogs.create(data)
     }
 }
 

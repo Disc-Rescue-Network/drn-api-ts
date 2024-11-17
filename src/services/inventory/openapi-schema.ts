@@ -3,7 +3,9 @@ import { SchemaManager, OpenApiStrategy } from '@techntools/sequelize-to-openapi
 import Inventory from './models/inventory'
 import Claim from './models/claim'
 import Pickup from './models/pickup'
+
 import Course from '../course/models/course'
+import SMSLogs from '../sms/models/sms-logs'
 
 import config from '../../config'
 
@@ -151,6 +153,14 @@ export default function () {
         }
     ]
 
+    const SendSMSSchema = schemaManager.generate(SMSLogs, strategy, {
+        exclude: ['recipientPhone', 'sentAt', ...config.autoAttributes],
+        associations: false
+    })
+    SendSMSSchema.properties['initialText'] = {
+        type: 'boolean'
+    }
+
     return {
         CreateInventorySchema,
         UpdateInventorySchema,
@@ -164,5 +174,7 @@ export default function () {
         ConfirmPickupSchema,
 
         ResendVerificationParams,
+
+        SendSMSSchema
     }
 }

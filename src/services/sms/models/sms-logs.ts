@@ -45,4 +45,4 @@ export default class SMSLogs extends Model {
 }
 
 
-export type SMSLogsData = Omit<SMSLogs, keyof Model>
+export type SMSLogsData = Omit<SMSLogs, keyof Model | 'item'>
