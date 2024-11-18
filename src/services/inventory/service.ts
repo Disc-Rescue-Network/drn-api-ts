@@ -279,35 +279,34 @@ export class InventoryService {
     }
 
     resendVerificationOTP = async (claimId: number) => {
-        const v = await VerificationOTP.findOne(
-            {
-                where: { claimId },
-                include: [
-                    {
-                        model: Claim,
-                        include: [
-                            { model: Inventory }
-                        ]
-                    }
-                ],
-            }
+        let v = await VerificationOTP.findOne(
+            { where: { claimId } }
         )
 
-        if (!v)
-            throw new NotFound('No such verification is pending')
-
-        if (v.claim.item.status !== INVENTORY_STATUS.UNCLAIMED)
-            throw new NotFound('Disc is no longer up for claim')
+        const claim = await Claim.findByPk(
+            claimId,
+            { include: [Inventory] }
+        )
 
         const otp = generateOTP()
-
-        await v.update({ otp })
-
         const message = `DRN: Looks like you found your disc in one of our beacons. Use code "${otp}" to verify that it's really you.`
 
-        await smslib.sendSMS(v.claim.phoneNumber, message)
+        if (!v) {
+            v = await VerificationOTP.create({
+                claimId,
+                otp,
+                phoneNumberMatches: claim.phoneNumber === claim.item.phoneNumber
+            })
 
-        return { claim: v.claim, vid: v.id }
+            await smslib.sendSMS(claim.phoneNumber, message)
+        } else if (claim.item.status !== INVENTORY_STATUS.UNCLAIMED) {
+            throw new NotFound('Disc is no longer up for claim')
+        } else {
+            await v.update({ otp })
+            await smslib.sendSMS(claim.phoneNumber, message)
+        }
+
+        return { claim, vid: v.id }
     }
 
     claimItem = async (data: ClaimData) => {
