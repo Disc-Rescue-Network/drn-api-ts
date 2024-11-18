@@ -445,14 +445,22 @@ export class InventoryService {
     }
 
     verifyClaim = async (data: { claimId: number, verified: boolean }) => {
-        const result = await Claim.update(
-            { verified: data.verified },
-            { where: { id: data.claimId }, validate: false }
-        )
-        if (result[0])
-            return 'Record updated'
+        const claim = await Claim.findOne({
+            where: { id: data.claimId },
+            include: [Inventory]
+        })
 
-        throw new NotFound('No such record to update')
+        if (data.verified) {
+            const verifiedClaim = await Claim.findOne({
+                where: { verified: true, itemId: claim.itemId }
+            })
+            if (verifiedClaim && verifiedClaim.id !== data.claimId)
+                throw new ConflictError('Another claim has already been verified')
+        }
+
+        await claim.update({ verified: data.verified })
+
+        return claim
     }
 
     getFormattedScheduleDate = (scheduledOn: string | Date) => {
