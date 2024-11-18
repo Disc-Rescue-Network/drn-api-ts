@@ -188,7 +188,8 @@ export class InventoryController extends AppController {
             return inventoryService.findAll(
                 plainToClass(PageOptions, req.query),
                 req.query.q as string,
-                req.query.orgCode as string
+                req.query.orgCode as string,
+                req.query.nonVerified
             )
         }
     )

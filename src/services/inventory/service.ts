@@ -57,7 +57,8 @@ export class InventoryService {
     findAll = async (
         pageOptions: PageOptions,
         q: string,
-        orgCode: string
+        orgCode: string,
+        nonVerified: any
     ) => {
         const where: any = { deleted: 0 }
         const include: any[] = [
@@ -67,11 +68,23 @@ export class InventoryService {
             {
                 model: Disc,
                 include: Brand
-            },
-            {
-                model: Claim
             }
         ]
+
+        if (nonVerified) {
+            where['$claims.id$'] = null
+            include.push({
+                model: Claim,
+                where: {
+                    verified: true
+                },
+                required: false
+            })
+        } else {
+            include.push({
+                model: Claim
+            })
+        }
 
         const query = {
             where,
@@ -86,7 +99,7 @@ export class InventoryService {
             query.where[Op.or] = [
                 Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('Inventory.name')), 'LIKE', qs),
                 Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('Inventory.name')), 'LIKE', qs),
-                Sequelize.literal(`MATCH (comments) AGAINST (${sqlEscape(qs)})`),
+                Sequelize.literal(`MATCH (Inventory.comments) AGAINST (${sqlEscape(qs)})`),
                 { 'phoneNumber': { [Op.like]: qs }},
             ]
         }
@@ -105,7 +118,11 @@ export class InventoryService {
             }
         }
 
-        const result = await Inventory.findAndCountAll(query)
+        const result = await Inventory.findAndCountAll({
+            ...query,
+            distinct: true,
+            subQuery: false
+        })
 
         return new Page(result.rows, result.count, pageOptions)
     }
