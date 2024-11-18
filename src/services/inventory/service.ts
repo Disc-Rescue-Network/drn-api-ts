@@ -225,6 +225,7 @@ export class InventoryService {
                 await otp.claim.update(
                     {
                         tofAccepted: data.tofAccepted,
+                        pcmVerified: true,
                         surrendered: data.surrenderRequested ? true : false
                     },
                     { transaction }
@@ -235,7 +236,10 @@ export class InventoryService {
                  * admin verification. Directly mark it verified.
                  */
                 if (otp.claim.surrendered) {
-                    await otp.claim.update({ verified: true, }, { transaction })
+                    await otp.claim.update({
+                        verified: true,
+                        pcmVerified: true,
+                    }, { transaction })
 
                     const beforeUpdate = Object.assign({}, otp.claim.item.dataValues)
 
@@ -255,6 +259,7 @@ export class InventoryService {
                     await otp.claim.update(
                         {
                             verified: true,
+                            pcmVerified: true,
                             surrendered: data.surrenderRequested ? true : false
                         },
                         { where: { id: otp.claimId }, transaction, validate: false }

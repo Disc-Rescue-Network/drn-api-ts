@@ -48,6 +48,12 @@ export default class Claim extends Model {
         allowNull: false,
         defaultValue: false
     })
+    pcmVerified: boolean
+
+    @Column({
+        allowNull: false,
+        defaultValue: false
+    })
     tofAccepted: boolean
 
     /*

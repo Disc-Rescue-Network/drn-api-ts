@@ -48,6 +48,7 @@ export default function () {
         exclude: [
             'tofAccepted',
             'verified',
+            'pcmVerified',
             ...config.autoAttributes
         ],
         associations: false
