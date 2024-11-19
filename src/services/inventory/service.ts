@@ -58,7 +58,8 @@ export class InventoryService {
         pageOptions: PageOptions,
         q: string,
         orgCode: string,
-        nonVerified: any
+        nonVerified: any,
+        nonPending: any
     ) => {
         const where: any = { deleted: 0 }
         const include: any[] = [
@@ -71,15 +72,27 @@ export class InventoryService {
             }
         ]
 
-        if (nonVerified) {
-            where['$claims.id$'] = null
-            include.push({
-                model: Claim,
-                where: {
-                    verified: true
-                },
-                required: false
-            })
+        if (nonVerified || nonPending) {
+            if (nonVerified) {
+                where['$claims.id$'] = null
+                include.push({
+                    model: Claim,
+                    where: {
+                        verified: true
+                    },
+                    required: false
+                })
+            } else if (nonPending) {
+                where[Op.and] = {
+                    [Op.or]: [
+                        { '$claims.id$': null },
+                        { '$claims.verified$': true }
+                    ]
+                }
+                include.push({
+                    model: Claim,
+                })
+            }
         } else {
             include.push({
                 model: Claim
@@ -94,7 +107,7 @@ export class InventoryService {
         }
 
         if (q) {
-            const qs = `%${q.toLocaleLowerCase()}%`
+            const qs = `%${q.toLowerCase()}%`
 
             query.where[Op.or] = [
                 Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('Inventory.name')), 'LIKE', qs),

@@ -189,7 +189,8 @@ export class InventoryController extends AppController {
                 plainToClass(PageOptions, req.query),
                 req.query.q as string,
                 req.query.orgCode as string,
-                req.query.nonVerified
+                req.query.nonVerified,
+                req.query.nonPending,
             )
         }
     )
