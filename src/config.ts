@@ -52,6 +52,9 @@ export class EnvConfig {
     @IsString()
     twilioMessagingSID: string
 
+    @IsString()
+    supportName: string
+
     @IsEmail()
     @IsString()
     supportEmail: string
@@ -117,6 +120,7 @@ export class EnvConfig {
         this.dbConfig.username = process.env.DB_USER
         this.dbConfig.password = process.env.DB_PASSWORD
 
+        this.supportName = process.env.SUPPORT_NAME
         this.supportEmail = process.env.SUPPORT_EMAIL
         this.supportEmailPassword = process.env.SUPPORT_EMAIL_PASSWORD
 
