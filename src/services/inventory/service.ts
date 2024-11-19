@@ -779,7 +779,19 @@ export class InventoryService {
              * not needed.
              */
             await claim.update({ pcmVerified: false }, { transaction })
+
+            const beforeUpdate = Object.assign({}, claim.item.dataValues)
+
             await claim.item.update({ status: INVENTORY_STATUS.UNCLAIMED }, { transaction })
+
+            const diff = jsonDiff.diff(beforeUpdate, claim.item.dataValues)
+            await userLib.logActivity({
+                type: ACTIVITY_TYPE.UPDATE,
+                objectId: claim.item.id,
+                objectType: ACTIVITY_TARGET.INVENTORY,
+                orgCode: claim.item.orgCode,
+                data: { diff }
+            }, transaction)
 
             if (claim.phoneNumber)
                 await smslib.sendSMS(
