@@ -315,8 +315,22 @@ export class InventoryService {
 
         const claim = await Claim.findByPk(
             claimId,
-            { include: [Inventory] }
+            {
+                include: [
+                    {
+                        model: Inventory,
+                        include: [Disc]
+                    },
+                    {
+                        model: Pickup,
+                        include: [Course]
+                    }
+                ]
+            }
         )
+
+        if (claim.item.status !== INVENTORY_STATUS.UNCLAIMED)
+            throw new NotFound('Disc is no longer up for claim')
 
         const otp = generateOTP()
         const message = `DRN: Looks like you found your disc in one of our beacons. Use code "${otp}" to verify that it's really you.`
@@ -327,13 +341,18 @@ export class InventoryService {
                 otp,
                 phoneNumberMatches: claim.phoneNumber === claim.item.phoneNumber
             })
-
-            await smslib.sendSMS(claim.phoneNumber, message)
-        } else if (claim.item.status !== INVENTORY_STATUS.UNCLAIMED) {
-            throw new NotFound('Disc is no longer up for claim')
         } else {
             await v.update({ otp })
+        }
+
+        if (claim.phoneNumber) {
             await smslib.sendSMS(claim.phoneNumber, message)
+        } else {
+            await sendPCMVerificationEmail(claim.email, {
+                discName: claim.item.disc.name,
+                courseName: claim.pickup.course.name,
+                otp
+            })
         }
 
         return { claim, vid: v.id }
