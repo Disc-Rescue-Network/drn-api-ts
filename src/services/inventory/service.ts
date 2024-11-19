@@ -241,7 +241,7 @@ export class InventoryService {
             if (!otp)
                 throw new NotFound('No such verification is pending')
 
-            const diff = Date.now() - (new Date(otp.createdAt)).getTime()
+            const diff = Date.now() - (new Date(otp.updatedAt)).getTime()
             if (diff > 86400000)
                 throw new Forbidden('OTP has expired')
 

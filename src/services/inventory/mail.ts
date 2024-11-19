@@ -15,7 +15,10 @@ const pickupCompleteTemplate = Handlebars.compile(fs.readFileSync(join(__dirname
 const surrenderTemplate = Handlebars.compile(fs.readFileSync(join(__dirname, 'template', 'surrender.hbs'), 'utf8'))
 
 const defaultMailOptions = {
-    from: config.supportEmail
+    from: {
+        name: config.supportName,
+        address: config.supportEmail
+    }
 }
 
 function sendPCMVerificationEmail(
