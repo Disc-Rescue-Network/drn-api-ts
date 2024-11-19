@@ -731,57 +731,72 @@ export class InventoryService {
         const transaction = await mysql.sequelize.transaction()
 
         try {
-            const v = await VerificationOTP.findOne({
+            const claim = await Claim.findByPk(
+                claimId,
+                {
+                    include: [
+                        {
+                            model: Inventory,
+                            include: [Disc]
+                        },
+                        {
+                            model: Pickup,
+                            include: [Course]
+                        }
+                    ]
+                }
+            )
+
+            if (!claim)
+                throw new NotFound('No such claim')
+
+            if (claim.surrendered)
+                throw new ConflictError('Surrendered already')
+
+            if ([INVENTORY_STATUS.CLAIMED].includes(claim.item.status))
+                throw new Forbidden('Item is no longer up for surrender')
+
+            let v = await VerificationOTP.findOne({
                 where: { claimId },
-                include: [
-                    {
-                        model: Claim,
-                        include: [
-                            {
-                                model: Inventory,
-                                include: [
-                                    Disc
-                                ]
-                            },
-                            {
-                                model: Pickup,
-                                include: [Course]
-                            }
-                        ]
-                    },
-                ],
                 transaction
             })
 
-            if (!v)
-                throw new NotFound('No such claim')
-
-            if (![ INVENTORY_STATUS.UNCLAIMED ].includes(v.claim.item.status))
-                throw new Forbidden('Item is no longer up for surrender')
-
             const otp = generateOTP()
 
-            await v.update({ otp }, { transaction })
+            if (!v) {
+                v = await VerificationOTP.create({
+                    claimId,
+                    otp,
+                    phoneNumberMatches: claim.phoneNumber === claim.item.phoneNumber
+                })
+            } else {
+                await v.update({ otp }, { transaction })
+            }
 
-            if (v.phoneNumberMatches)
-                await v.claim.update({ verified: false }, { transaction })
+            /*
+             * Admin can verify a claim even if PCM is not yet verified. So
+             * resetting verified flag whether phone number matches or not is
+             * not needed.
+             */
+            await claim.update({ pcmVerified: false }, { transaction })
+            await claim.item.update({ status: INVENTORY_STATUS.UNCLAIMED }, { transaction })
 
-            if (v.claim.phoneNumber)
+            if (claim.phoneNumber)
                 await smslib.sendSMS(
+                    claim.phoneNumber,
                     `DRN: Looks like you found your disc in one of our beacons. Use code "${otp}" to verify that it's really you.`,
-                    v.claim.phoneNumber
                 )
             else {
-                await sendSurrenderEmail(v.claim.email, {
-                    discName: v.claim.item.disc.name,
-                    courseName: v.claim.pickup.course.name,
+                await sendSurrenderEmail(claim.email, {
+                    discName: claim.item.disc.name,
+                    courseName: claim.pickup.course.name,
                     otp
                 })
             }
 
             await transaction.commit()
 
-            return { claim: v.claim, vid: v.id }
+            return { claim, vid: v.id }
         } catch(err) {
             await transaction.rollback()
             throw err
