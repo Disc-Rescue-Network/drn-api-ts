@@ -36,6 +36,7 @@ export class NotificationController extends AppController {
                 requestBodySchema: schemas.UpdateStatusSchema,
                 summary: 'Update notification status'
             })),
+            requireLogin,
             this.updateStatus
         )
 
