@@ -1000,10 +1000,13 @@ export class InventoryService {
 
     findAllSMS = async (
         pageOptions: PageOptions,
-        itemId: number,
+        itemId?: number,
     ) => {
-        const where: {} = { itemId }
+        const where: {} = {}
         const include: any[] = []
+
+        if (itemId)
+            where['itemId'] = itemId
 
         const query = {
             where,

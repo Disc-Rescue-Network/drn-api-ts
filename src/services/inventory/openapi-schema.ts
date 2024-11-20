@@ -169,7 +169,7 @@ export default function () {
             schema: {
                 type: 'integer'
             },
-            required: true
+            required: false
         }
     ]
 
