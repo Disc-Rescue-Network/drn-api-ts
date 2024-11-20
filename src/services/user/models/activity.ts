@@ -5,7 +5,9 @@ import { ACTIVITY_TYPE, ACTIVITY_TARGET } from '../constant'
 import Course from '../../course/models/course'
 
 
-@Table
+@Table({
+    updatedAt: false
+})
 export default class Activity extends Model {
     @Column({
         type: DataType.ENUM(...Object.values(ACTIVITY_TYPE)),
