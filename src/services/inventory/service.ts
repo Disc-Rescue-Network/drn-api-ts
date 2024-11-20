@@ -357,7 +357,12 @@ export class InventoryService {
                 include: [
                     {
                         model: Inventory,
-                        include: [Disc]
+                        include: [
+                            {
+                                model: Disc,
+                                include: [Brand]
+                            }
+                        ]
                     },
                     {
                         model: Pickup,
@@ -388,6 +393,9 @@ export class InventoryService {
         } else {
             await sendPCMVerificationEmail(claim.email, {
                 discName: claim.item.disc.name,
+                color: claim.item.color,
+                brand: claim.item.disc.brand.name,
+                plasticType: claim.item.disc.plasticType,
                 courseName: claim.pickup.course.name,
                 otp
             })
@@ -461,7 +469,12 @@ export class InventoryService {
                     include: [
                         {
                             model: Inventory,
-                            include: [Disc]
+                            include: [
+                                {
+                                    model: Disc,
+                                    include: [Brand]
+                                }
+                            ]
                         },
                         {
                             model: Pickup,
@@ -491,6 +504,9 @@ export class InventoryService {
             } else {
                 await sendPCMVerificationEmail(currentClaim.email, {
                     discName: currentClaim.item.disc.name,
+                    color: currentClaim.item.color,
+                    brand: currentClaim.item.disc.brand.name,
+                    plasticType: currentClaim.item.disc.plasticType,
                     courseName: currentClaim.pickup.course.name,
                     otp
                 })

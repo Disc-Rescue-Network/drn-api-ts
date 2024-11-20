@@ -26,6 +26,9 @@ function sendPCMVerificationEmail(
     context: {
         discName: string,
         courseName: string,
+        color: string,
+        plasticType: string
+        brand: string,
         otp: string,
     }
 ) {
