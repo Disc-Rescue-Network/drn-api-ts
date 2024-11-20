@@ -873,12 +873,16 @@ export class InventoryService {
 
     findActivities = async (
         pageOptions: PageOptions,
-        orgCode: string
+        orgCode: string,
+        itemId?: number
     ) => {
         const where: any = {
             orgCode,
             objectType: ACTIVITY_TARGET.INVENTORY,
         }
+
+        if (itemId)
+            where['objectId'] = itemId
 
         const query = {
             where,

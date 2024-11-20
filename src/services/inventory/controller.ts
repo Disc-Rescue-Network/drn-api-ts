@@ -311,7 +311,8 @@ export class InventoryController extends AppController {
         async (req: Request) => {
             return inventoryService.findActivities(
                 plainToClass(PageOptions, req.query),
-                req.auth.payload.org_code as string
+                req.auth.payload.org_code as string,
+                parseInt(req.query.itemId as string),
             )
         }
     )
