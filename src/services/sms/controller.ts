@@ -19,10 +19,12 @@ import {
   OPT_IN_KEYWORDS,
   OPT_OUT_KEYWORDS,
   TICKET_KEYWORD,
+  HELP_KEYWORD,
   formatClaimInventoryMessage,
   optInMessage,
   ticketMessage,
   defaultMessage,
+  helpMessage,
 } from './message'
 
 import inventoryLib from '../inventory/lib'
@@ -192,7 +194,9 @@ export class SMSController extends AppController {
 
         res.type('text/xml')
 
-        if (textMessage === TICKET_KEYWORD) {
+        if (textMessage === HELP_KEYWORD) {
+            return res.send(twilioResponse.message(helpMessage).toString())
+        } else if (textMessage === TICKET_KEYWORD) {
             return res.send(twilioResponse.message(ticketMessage).toString())
         } else if (OPT_OUT_KEYWORDS.includes(textMessage)) {
             await smsService.updatePhoneOptIn({
