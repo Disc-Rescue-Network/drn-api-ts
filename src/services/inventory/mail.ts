@@ -39,6 +39,7 @@ function sendPCMVerificationEmail(
         html: pcmVerificationTemplate({
             ...context,
             openTicket: config.drnOpenTicket,
+            drnApp: config.drnApp,
             logo
         })
     })
@@ -60,6 +61,7 @@ function sendPickupConfirmationEmail(to: string, context: {
         html: pickupConfirmationTemplate({
             ...context,
             openTicket: config.drnOpenTicket,
+            drnApp: config.drnApp,
             logo
         })
     })

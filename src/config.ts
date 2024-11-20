@@ -86,6 +86,9 @@ export class EnvConfig {
     @IsString()
     drnOpenTicket: string
 
+    @IsString()
+    drnApp: string
+
     @IsInt()
     defaultPage: number = 1
 
@@ -134,6 +137,7 @@ export class EnvConfig {
 
         this.drnAdminsOrgCode = process.env.DRN_ADMINS_ORG_CODE
         this.drnOpenTicket = process.env.DRN_OPEN_TICKET
+        this.drnApp = process.env.DRN_APP
 
         this.allowedHosts = process.env.ALLOWED_HOSTS?.split(',')
 
