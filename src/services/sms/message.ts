@@ -9,11 +9,11 @@ export const OPT_IN_KEYWORDS: string[] = [
 export const OPT_OUT_KEYWORDS: string[] = ["cancel", "stop"] as const
 
 export const TICKET_KEYWORD: string = 'ticket'
-export const HELP_KEYWORD: string = 'help'
+export const RESCUE_KEYWORD: string = 'rescue'
 
 export const defaultMessage = `This number is not monitored. Text 'HELP' for keywords or visit app.discrescuenetwork.com for more info.`
 
-export const helpMessage = `Reply STOP to unsubscribe. Reply TICKET or visit "app.discrescuenetwork.com" for more help. Msg&Data Rates May Apply`
+export const rescueMessage = `Reply STOP to unsubscribe. Reply TICKET or visit "app.discrescuenetwork.com" for more help. Msg&Data Rates May Apply`
 
 export const optInMessage = `Disc Rescue Network (DRN): We’ve found your disc! Reply "CLAIM" to consent to receive text updates about your disc, including claim instructions. Msg&Data rates may apply. Reply "STOP" to opt-out.`;
 
