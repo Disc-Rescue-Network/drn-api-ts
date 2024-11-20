@@ -180,6 +180,15 @@ export class InventoryController extends AppController {
             this.sendSMS
         )
 
+        this.router.get(
+            '/sms',
+            oapi.validPath(oapiPathDef({
+                parameters: schemas.GetSMSSchema,
+                summary: 'Get SMS Logs'
+            })),
+            this.findAllSMS
+        )
+
         return this
     }
 
@@ -326,6 +335,15 @@ export class InventoryController extends AppController {
     sendSMS = AppController.asyncHandler(
         async (req: Request) => {
             return inventoryService.sendSMS(req.body)
+        }
+    )
+
+    findAllSMS = AppController.asyncHandler(
+        async (req: Request) => {
+            return inventoryService.findAllSMS(
+                plainToClass(PageOptions, req.query),
+                parseInt(req.query.itemId as string)
+            )
         }
     )
 }

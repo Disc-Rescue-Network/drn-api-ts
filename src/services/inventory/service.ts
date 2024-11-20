@@ -36,6 +36,7 @@ import { NOTIFICATION_TYPE } from '../notification/constant'
 import userLib from '../user/lib'
 import { ACTIVITY_TYPE, ACTIVITY_TARGET } from '../user/constant'
 import Activity from '../user/models/activity'
+import SMSLogs from '../sms/models/sms-logs'
 
 import config from '../../config'
 
@@ -995,6 +996,25 @@ export class InventoryService {
             await transaction.rollback()
             throw err
         }
+    }
+
+    findAllSMS = async (
+        pageOptions: PageOptions,
+        itemId: number,
+    ) => {
+        const where: {} = { itemId }
+        const include: any[] = []
+
+        const query = {
+            where,
+            include,
+            offset: pageOptions.offset,
+            limit: pageOptions.limit,
+        }
+
+        const result = await SMSLogs.findAndCountAll(query)
+
+        return new Page(result.rows, result.count, pageOptions)
     }
 }
 

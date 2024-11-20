@@ -162,6 +162,17 @@ export default function () {
         type: 'boolean'
     }
 
+    const GetSMSSchema = [
+        {
+            in: 'query',
+            name: 'itemId',
+            schema: {
+                type: 'integer'
+            },
+            required: true
+        }
+    ]
+
     return {
         CreateInventorySchema,
         UpdateInventorySchema,
@@ -176,6 +187,7 @@ export default function () {
 
         ResendVerificationParams,
 
-        SendSMSSchema
+        SendSMSSchema,
+        GetSMSSchema
     }
 }
