@@ -22,6 +22,7 @@ import {
   formatClaimInventoryMessage,
   optInMessage,
   ticketMessage,
+  defaultMessage,
 } from './message'
 
 import inventoryLib from '../inventory/lib'
@@ -185,7 +186,7 @@ export class SMSController extends AppController {
         const phoneNumber = req.body.From
         const textMessage = req.body.Body.trim().toLowerCase()
 
-        let responseMessage: string = 'Thanks for the message - Disc Rescue Network'
+        let responseMessage = defaultMessage
 
         const twilioResponse = new twiml.MessagingResponse()
 

@@ -10,6 +10,8 @@ export const OPT_OUT_KEYWORDS: string[] = ["cancel", "stop"] as const;
 
 export const TICKET_KEYWORD: string = 'ticket';
 
+export const defaultMessage = `This number is not monitored. Text 'HELP' for keywords or visit app.discrescuenetwork.com for more info.`;
+
 export const optInMessage = `Disc Rescue Network (DRN): We’ve found your disc! Reply "CLAIM" to consent to receive text updates about your disc, including claim instructions. Msg&Data rates may apply. Reply "STOP" to opt-out.`;
 
 export const formatClaimInventoryMessage = (
