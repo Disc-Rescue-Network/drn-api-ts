@@ -21,4 +21,4 @@ export const formatClaimInventoryMessage = (
     : `Disc Rescue Network (DRN): We do not have any discs in the system with your phone number, however, at any time you can visit https://app.discrescuenetwork.com to search the inventory for your lost plastic. Additionally, if any show up in the network, we will let you know.`;
 };
 
-export const ticketMessage = `DRN: Sorry to hear about your issue with recovering your lost disc. Please visit the link and open a ticket for our support staff to look into the issue: ${config.drnOpenTicket}`
+export const ticketMessage = `DRN: Sorry to hear about your issue with recovering your lost disc. Please visit the link and open a ticket for the course to look into the issue: ${config.drnOpenTicket}`
