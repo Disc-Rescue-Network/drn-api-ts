@@ -12,6 +12,8 @@ export class UserLib {
 
             if (!jsonData['diff'] || Object.keys(jsonData['diff']).length === 0)
                 return
+            else
+                delete jsonData['diff'].updatedAt
         }
 
         return Activity.create(data, { transaction })
