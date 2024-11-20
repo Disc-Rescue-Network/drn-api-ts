@@ -137,7 +137,45 @@ export class InventoryService {
             subQuery: false
         })
 
-        return new Page(result.rows, result.count, pageOptions)
+        const includeClaims: {}[] = [
+            {
+                model: Course
+            },
+            {
+                model: Disc,
+                include: Brand
+            }
+        ]
+        if (nonVerified || nonPending) {
+            if (nonVerified) {
+                includeClaims.push({
+                    model: Claim,
+                    where: {
+                        verified: false
+                    },
+                    required: false
+                })
+            } else if (nonPending) {
+                includeClaims.push({
+                    model: Claim,
+                    where: {
+                        verified: true
+                    },
+                    required: false
+                })
+            }
+        } else {
+            includeClaims.push({ model: Claim })
+        }
+
+        const withClaims = await Inventory.findAll({
+            where: {
+                id: result.rows.map(res => { return res.id })
+            },
+            include: includeClaims
+        })
+
+        return new Page(withClaims, result.count, pageOptions)
     }
 
     findById = async (id: number) => {
