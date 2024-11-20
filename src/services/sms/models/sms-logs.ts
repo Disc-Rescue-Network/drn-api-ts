@@ -5,7 +5,9 @@ import { StoreLib } from '../../../store/lib'
 import Inventory from '../../inventory/models/inventory'
 
 
-@Table
+@Table({
+    timestamps: false
+})
 export default class SMSLogs extends Model {
     @ForeignKey(() => Inventory)
     @Column({
