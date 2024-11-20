@@ -393,6 +393,7 @@ export class InventoryService {
             await smslib.sendSMS(claim.phoneNumber, message)
         } else {
             await sendPCMVerificationEmail(claim.email, {
+                claimId: claim.id,
                 discName: claim.item.disc.name,
                 color: claim.item.color,
                 brand: claim.item.disc.brand.name,
@@ -504,6 +505,7 @@ export class InventoryService {
                 )
             } else {
                 await sendPCMVerificationEmail(currentClaim.email, {
+                    claimId: currentClaim.id,
                     discName: currentClaim.item.disc.name,
                     color: currentClaim.item.color,
                     brand: currentClaim.item.disc.brand.name,
@@ -646,6 +648,7 @@ export class InventoryService {
 
             if (pickup.claim.email) {
                 await sendPickupConfirmationEmail(pickup.claim.email, {
+                    claimId: pickup.claim.id,
                     status: data.scheduledOn ? 'confirmed' : 'rescheduled',
                     discName: pickup.claim.item.disc.name,
                     courseName: pickup.course.name,

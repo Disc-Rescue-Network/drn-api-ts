@@ -24,6 +24,7 @@ const defaultMailOptions = {
 function sendPCMVerificationEmail(
     to: string,
     context: {
+        claimId: number,
         discName: string,
         courseName: string,
         color: string,
@@ -38,7 +39,7 @@ function sendPCMVerificationEmail(
         subject: 'We have received your claim',
         html: pcmVerificationTemplate({
             ...context,
-            openTicket: config.drnOpenTicket,
+            openTicket: config.drnOpenTicket + `?claimId=${context.claimId}`,
             drnApp: config.drnApp,
             logo
         })
@@ -46,6 +47,7 @@ function sendPCMVerificationEmail(
 }
 
 function sendPickupConfirmationEmail(to: string, context: {
+    claimId: number,
     status: string,
     discName: string,
     courseName: string,
@@ -60,7 +62,7 @@ function sendPickupConfirmationEmail(to: string, context: {
         subject: 'Pickup confirmation of claimed disc',
         html: pickupConfirmationTemplate({
             ...context,
-            openTicket: config.drnOpenTicket,
+            openTicket: config.drnOpenTicket + `?claimId=${context.claimId}`,
             drnApp: config.drnApp,
             logo
         })
