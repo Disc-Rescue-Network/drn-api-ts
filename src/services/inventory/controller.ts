@@ -197,6 +197,14 @@ export class InventoryController extends AppController {
             this.createTicketNotification
         )
 
+        this.router.delete(
+            '/claim/:id',
+            oapi.validPath(oapiPathDef({
+                summary: 'Delete Claim'
+            })),
+            this.deleteClaim
+        )
+
         return this
     }
 
@@ -358,6 +366,12 @@ export class InventoryController extends AppController {
     createTicketNotification = AppController.asyncHandler(
         async (req: Request) => {
             return inventoryService.createTicketNotification(parseInt(req.params.id))
+        }
+    )
+
+    deleteClaim = AppController.asyncHandler(
+        async (req: Request) => {
+            return inventoryService.deleteClaim(parseInt(req.params.id))
         }
     )
 }

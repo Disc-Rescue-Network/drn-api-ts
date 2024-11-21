@@ -1091,6 +1091,24 @@ export class InventoryService {
             throw err
         }
     }
+
+    deleteClaim = async (claimId: number) => {
+        const claim = await Claim.findByPk(
+            claimId,
+            {
+                include: [
+                    {
+                        model: Inventory,
+                    },
+                ]
+            }
+        )
+
+        if (claim.verified && claim.item.status === INVENTORY_STATUS.CLAIMED)
+            throw new Forbidden('Items has been claimed with this one')
+
+        return claim.destroy()
+    }
 }
 
 

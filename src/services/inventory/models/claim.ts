@@ -7,6 +7,7 @@ import Pickup, { PickupData } from '../../inventory/models/pickup'
 
 
 @Table({
+    paranoid: true,
     validate: {
         validator(this: Claim) {
             if (this.email && this.phoneNumber)
