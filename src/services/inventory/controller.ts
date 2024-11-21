@@ -216,6 +216,8 @@ export class InventoryController extends AppController {
                 req.query.orgCode as string,
                 req.query.nonVerified,
                 req.query.nonPending,
+                req.query.nonComplete,
+                req.query.nonVerifiedWithClaims,
             )
         }
     )

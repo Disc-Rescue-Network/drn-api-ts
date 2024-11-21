@@ -60,7 +60,9 @@ export class InventoryService {
         q: string,
         orgCode: string,
         nonVerified: any,
-        nonPending: any
+        nonPending: any,
+        nonComplete: any,
+        nonVerifiedWithClaims: any,
     ) => {
         const where: any = { deleted: 0 }
         const include: any[] = [
@@ -73,7 +75,7 @@ export class InventoryService {
             }
         ]
 
-        if (nonVerified || nonPending) {
+        if (nonVerified || nonPending || nonComplete || nonVerifiedWithClaims) {
             if (nonVerified) {
                 where['$claims.id$'] = null
                 include.push({
@@ -92,6 +94,19 @@ export class InventoryService {
                 }
                 include.push({
                     model: Claim,
+                })
+            } else if (nonComplete) {
+                where['status'] = INVENTORY_STATUS.PENDING_COURSE_PICKUP
+                include.push({
+                    model: Claim,
+                    required: true
+                })
+            } else if (nonVerifiedWithClaims) {
+                include.push({
+                    model: Claim,
+                    where: {
+                        verified: false
+                    },
                 })
             }
         } else {
@@ -147,7 +162,7 @@ export class InventoryService {
                 include: Brand
             }
         ]
-        if (nonVerified || nonPending) {
+        if (nonVerified || nonPending || nonComplete || nonVerifiedWithClaims) {
             if (nonVerified) {
                 includeClaims.push({
                     model: Claim,
@@ -163,6 +178,19 @@ export class InventoryService {
                         verified: true
                     },
                     required: false
+                })
+            } else if (nonComplete) {
+                where['status'] = INVENTORY_STATUS.PENDING_COURSE_PICKUP
+                includeClaims.push({
+                    model: Claim,
+                    required: true
+                })
+            } else if (nonVerifiedWithClaims) {
+                includeClaims.push({
+                    model: Claim,
+                    where: {
+                        verified: false
+                    },
                 })
             }
         } else {
