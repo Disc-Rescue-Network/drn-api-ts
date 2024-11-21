@@ -23,37 +23,32 @@ export class SocketController extends AppController {
     }
 
     debugInfo = AppController.asyncHandler(
-        async (_: Request, res: Response, next: NextFunction) => {
-            const result = await socketService.debugInfo()
-            res.success(result, next)
+        async () => {
+            return socketService.debugInfo()
         }
     )
 
     createRoom = AppController.asyncHandler(
-        async (req: Request, res: Response, next: NextFunction) => {
-            const result = await socketService.createRoom(req.body)
-            res.success(result, next)
+        async (req: Request) => {
+            return socketService.createRoom(req.body)
         }
     )
 
     getRooms = AppController.asyncHandler(
-        async (_: Request, res: Response, next: NextFunction) => {
-            const result = await socketService.getRooms()
-            res.success(result, next)
+        async () => {
+            return socketService.getRooms()
         }
     )
 
     updateRoom = AppController.asyncHandler(
-        async (req: Request, res: Response, next: NextFunction) => {
-            const result = await socketService.updateRoom(req.params.id, req.body)
-            res.success(result, next)
+        async (req: Request) => {
+            return socketService.updateRoom(req.params.id, req.body)
         }
     )
 
     removeRoom = AppController.asyncHandler(
-        async (req: Request, res: Response, next: NextFunction) => {
-            const result = await socketService.removeRoom(req.params.id)
-            res.success(result, next)
+        async (req: Request) => {
+            return socketService.removeRoom(req.params.id)
         }
     )
 }
