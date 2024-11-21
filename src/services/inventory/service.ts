@@ -1059,10 +1059,14 @@ export class InventoryService {
                 contactMethod = 'phone'
             }
 
+            let message = `Someone needs to reach out directly to ${contactMethod} ${contact} for help`
+            if (claim.firstName || claim.lastName)
+                message = `${[claim.firstName, claim.lastName].join(' ')} has asked for someone to reach out to them directly via ${contactMethod} @ ${contact} for help`
+
             const notif = await notificationLib.create(
                 {
                     type: NOTIFICATION_TYPE.CLAIM_TICKET,
-                    message: `Someone needs to reach out directly to ${contactMethod} ${contact} for help`,
+                    message,
                     objectId: claim.id,
                     objectType: NOTIFICATION_TYPE.CLAIM_TICKET,
                     orgCode: claim.pickup.course.orgCode

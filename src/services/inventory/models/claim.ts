@@ -25,6 +25,22 @@ import Pickup, { PickupData } from '../../inventory/models/pickup'
     },
 })
 export default class Claim extends Model {
+    @Length({
+        msg: 'length needs to be between 1 and 32',
+        min: 1,
+        max: 32
+    })
+    @Column
+    firstName: string
+
+    @Length({
+        msg: 'length needs to be between 1 and 32',
+        min: 1,
+        max: 32
+    })
+    @Column
+    lastName: string
+
     @ForeignKey(() => Inventory)
     @Column({
         allowNull: false,
