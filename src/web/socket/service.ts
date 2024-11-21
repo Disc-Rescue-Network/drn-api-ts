@@ -307,10 +307,16 @@ export class SocketService {
     }
 
     async debugInfo() {
+        const rooms = await store.getMatched(`<${config.serviceName}>room<*>`)
+
+        const profilesPerRoom = {}
+        for (const room of rooms) {
+            profilesPerRoom[room.id] = await store.getMatched(`<${config.serviceName}>room<${room.id}>member<*>profile`)
+        }
+
         return {
-            rooms: await store.getMatched(`<${config.serviceName}>room<*>`),
-            envs: await store.getMatched(`<${config.serviceName}>room<*>member<*>env`),
-            profiles: await store.getMatched(`<${config.serviceName}>room<*>member<*>profile`),
+            rooms,
+            profilesPerRoom,
         }
     }
 
