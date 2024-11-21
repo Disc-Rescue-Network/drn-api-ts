@@ -6,13 +6,6 @@ import Inventory from '../../inventory/models/inventory'
 import Pickup, { PickupData } from '../../inventory/models/pickup'
 
 
-/*
- * 1. How will we know if admin has contacted the claimer. Should we set some
- *    status for that ? Yes
- * 2. How to handle multiple claims for the same item ? Manually by admin
- */
-
-
 @Table({
     validate: {
         validator(this: Claim) {
