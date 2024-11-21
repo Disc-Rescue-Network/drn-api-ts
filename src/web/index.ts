@@ -79,6 +79,7 @@ export class Web {
 
         this.add(oapi)
 
+        this.add(socket.router, socket.basePath)
         this.add(disc.router, disc.basePath)
         this.add(brand.router, brand.basePath)
         this.add(course.router, course.basePath)
