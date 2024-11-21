@@ -1022,6 +1022,71 @@ export class InventoryService {
 
         return new Page(result.rows, result.count, pageOptions)
     }
+
+    createTicketNotification = async (claimId: number) => {
+        const transaction = await mysql.sequelize.transaction()
+
+        try {
+            const claim = await Claim.findByPk(
+                claimId,
+                {
+                    include: [
+                        {
+                            model: Inventory,
+                            include: [
+                                {
+                                    model: Disc,
+                                    include: [Brand]
+                                }
+                            ]
+                        },
+                        {
+                            model: Pickup,
+                            include: [Course]
+                        }
+                    ],
+                    transaction
+                }
+            )
+
+            if (!claim)
+                throw new NotFound('No such claim')
+
+            let contact = claim.email
+            let contactMethod = 'email'
+            if (claim.phoneNumber) {
+                contact = claim.phoneNumber
+                contactMethod = 'phone'
+            }
+
+            const notif = await notificationLib.create(
+                {
+                    type: NOTIFICATION_TYPE.CLAIM_TICKET,
+                    message: `Someone needs to reach out directly to ${contactMethod} ${contact} for help`,
+                    objectId: claim.id,
+                    objectType: NOTIFICATION_TYPE.CLAIM_TICKET,
+                    orgCode: claim.pickup.course.orgCode
+                },
+                transaction
+            )
+
+            await socketService.sendToRoom(
+                claim.pickup.course.orgCode,
+                {
+                    eventName: 'claimTicket',
+                    message: notif.message,
+                    data: claim
+                }
+            )
+
+            await transaction.commit()
+
+            return notif
+        } catch(err) {
+            await transaction.rollback()
+            throw err
+        }
+    }
 }
 
 

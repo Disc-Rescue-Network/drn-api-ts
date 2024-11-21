@@ -36,7 +36,7 @@ export class NotificationService {
         {
             const claimNotifs = []
             for (const res of result.rows) {
-                if (res.type === NOTIFICATION_TYPE.CLAIM)
+                if ([NOTIFICATION_TYPE.CLAIM, NOTIFICATION_TYPE.CLAIM_TICKET].includes(res.type))
                     claimNotifs.push(res)
             }
 

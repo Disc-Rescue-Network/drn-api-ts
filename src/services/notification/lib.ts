@@ -6,7 +6,7 @@ import Notification, { NotificationData } from './models/notification'
 export class NotificationLib {
     create = async (
         data: Omit<NotificationData, 'status'>,
-        transaction: Transaction
+        transaction?: Transaction
     ) => {
         return Notification.create(data, { transaction })
     }

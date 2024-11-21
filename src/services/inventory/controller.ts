@@ -189,6 +189,14 @@ export class InventoryController extends AppController {
             this.findAllSMS
         )
 
+        this.router.post(
+            '/claim/:id/ticket',
+            oapi.validPath(oapiPathDef({
+                summary: 'Send Ticket Notification'
+            })),
+            this.createTicketNotification
+        )
+
         return this
     }
 
@@ -344,6 +352,12 @@ export class InventoryController extends AppController {
                 plainToClass(PageOptions, req.query),
                 parseInt(req.query.itemId as string)
             )
+        }
+    )
+
+    createTicketNotification = AppController.asyncHandler(
+        async (req: Request) => {
+            return inventoryService.createTicketNotification(parseInt(req.params.id))
         }
     )
 }
