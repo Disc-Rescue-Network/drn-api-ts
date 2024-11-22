@@ -96,7 +96,14 @@ export class InventoryService {
                     model: Claim,
                 })
             } else if (nonComplete) {
-                where['status'] = INVENTORY_STATUS.PENDING_COURSE_PICKUP
+                where['status'] = {
+                    [Op.notIn]: [
+                        INVENTORY_STATUS.CLAIMED,
+                        INVENTORY_STATUS.FOR_SALE,
+                        INVENTORY_STATUS.SOLD,
+                        INVENTORY_STATUS.SOLD_OFFLINE,
+                    ]
+                }
                 include.push({
                     model: Claim,
                     required: true
@@ -180,7 +187,14 @@ export class InventoryService {
                     required: false
                 })
             } else if (nonComplete) {
-                where['status'] = INVENTORY_STATUS.PENDING_COURSE_PICKUP
+                where['status'] = {
+                    [Op.ne]: [
+                        INVENTORY_STATUS.CLAIMED,
+                        INVENTORY_STATUS.FOR_SALE,
+                        INVENTORY_STATUS.SOLD,
+                        INVENTORY_STATUS.SOLD_OFFLINE,
+                    ]
+                }
                 includeClaims.push({
                     model: Claim,
                     required: true
