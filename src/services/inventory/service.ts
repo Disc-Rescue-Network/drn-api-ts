@@ -12,7 +12,6 @@ import {
     sendPCMVerificationEmail,
     sendPickupConfirmationEmail,
     sendPickupCompleteEmail,
-    sendSurrenderEmail
 } from './mail'
 
 import Disc from '../disc/models/disc'
@@ -307,7 +306,6 @@ export class InventoryService {
             vid: number,
             otp: string,
             tofAccepted: boolean,
-            surrenderRequested?: boolean
         }
     ) => {
         const transaction = await mysql.sequelize.transaction()
@@ -339,7 +337,6 @@ export class InventoryService {
                     {
                         tofAccepted: data.tofAccepted,
                         pcmVerified: true,
-                        surrendered: data.surrenderRequested ? true : false
                     },
                     { transaction }
                 )
@@ -373,7 +370,6 @@ export class InventoryService {
                         {
                             verified: true,
                             pcmVerified: true,
-                            surrendered: data.surrenderRequested ? true : false
                         },
                         { where: { id: otp.claimId }, transaction, validate: false }
                     )
@@ -824,94 +820,6 @@ export class InventoryService {
             await transaction.commit()
 
             return pickup.claim.item
-        } catch(err) {
-            await transaction.rollback()
-            throw err
-        }
-    }
-
-    surrenderDisc = async (claimId: number) => {
-        const transaction = await mysql.sequelize.transaction()
-
-        try {
-            const claim = await Claim.findByPk(
-                claimId,
-                {
-                    include: [
-                        {
-                            model: Inventory,
-                            include: [Disc]
-                        },
-                        {
-                            model: Pickup,
-                            include: [Course]
-                        }
-                    ]
-                }
-            )
-
-            if (!claim)
-                throw new NotFound('No such claim')
-
-            if (claim.surrendered)
-                throw new ConflictError('Surrendered already')
-
-            if ([INVENTORY_STATUS.CLAIMED].includes(claim.item.status))
-                throw new Forbidden('Item is no longer up for surrender')
-
-            let v = await VerificationOTP.findOne({
-                where: { claimId },
-                transaction
-            })
-
-            const otp = generateOTP()
-
-            if (!v) {
-                v = await VerificationOTP.create({
-                    claimId,
-                    otp,
-                    phoneNumberMatches: claim.phoneNumber === claim.item.phoneNumber
-                })
-            } else {
-                await v.update({ otp }, { transaction })
-            }
-
-            /*
-             * Admin can verify a claim even if PCM is not yet verified. So
-             * resetting verified flag whether phone number matches or not is
-             * not needed.
-             */
-            await claim.update({ pcmVerified: false }, { transaction })
-
-            const beforeUpdate = Object.assign({}, claim.item.dataValues)
-
-            await claim.item.update({ status: INVENTORY_STATUS.UNCLAIMED }, { transaction })
-
-            const diff = jsonDiff.diff(beforeUpdate, claim.item.dataValues)
-            await userLib.logActivity({
-                type: ACTIVITY_TYPE.UPDATE,
-                objectId: claim.item.id,
-                objectType: ACTIVITY_TARGET.INVENTORY,
-                orgCode: claim.item.orgCode,
-                data: { diff }
-            }, transaction)
-
-            if (claim.phoneNumber)
-                await smslib.sendSMS(
-                    claim.phoneNumber,
-                    `DRN: Looks like you found your disc in one of our beacons. Use code "${otp}" to verify that it's really you.`,
-                )
-            else {
-                await sendSurrenderEmail(claim.email, {
-                    discName: claim.item.disc.name,
-                    courseName: claim.pickup.course.name,
-                    otp
-                })
-            }
-
-            await transaction.commit()
-
-            return { claim, vid: v.id }
         } catch(err) {
             await transaction.rollback()
             throw err
