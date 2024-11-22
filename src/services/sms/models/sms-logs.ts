@@ -10,10 +10,8 @@ import Inventory from '../../inventory/models/inventory'
 })
 export default class SMSLogs extends Model {
     @ForeignKey(() => Inventory)
-    @Column({
-        allowNull: false
-    })
-    itemId: number
+    @Column
+    itemId?: number
 
     @BelongsTo(() => Inventory)
     item?: Inventory
