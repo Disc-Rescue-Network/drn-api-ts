@@ -124,16 +124,12 @@ export class SMSController extends AppController {
             if (reqBody.initialText) {
                 const optInStatus = await lib.getOptInStatus(reqBody.recipientPhone)
 
-                let setDateTexted = false
-
                 if (optInStatus === null) {
-                    // request opt in
+                    // Request opt in
                     await smslib.sendSMS(
                         reqBody.recipientPhone,
                         optInMessage
                     )
-
-                    setDateTexted = true
                 } else if (optInStatus.smsConsent) {
                     // Log the custom SMS
                     await lib.insertSmsLog({
@@ -141,19 +137,11 @@ export class SMSController extends AppController {
                         sentAt: new Date(),
                     })
 
-                    // user is opted in, send text
+                    // User is opted in, send text
                     await smslib.sendSMS(
                         reqBody.recipientPhone,
                         reqBody.message
                     )
-
-                    setDateTexted = true
-                }
-
-                if (setDateTexted) {
-                    await inventoryLib.update(reqBody.itemId, {
-                        dateTexted: new Date(new Date().toISOString().split("T")[0]),
-                    })
                 }
             } else {
                 // Log the custom SMS
