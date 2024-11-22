@@ -102,6 +102,7 @@ export class InventoryService {
                         INVENTORY_STATUS.FOR_SALE,
                         INVENTORY_STATUS.SOLD,
                         INVENTORY_STATUS.SOLD_OFFLINE,
+                        INVENTORY_STATUS.SURRENDERED,
                     ]
                 }
                 include.push({
@@ -193,6 +194,7 @@ export class InventoryService {
                         INVENTORY_STATUS.FOR_SALE,
                         INVENTORY_STATUS.SOLD,
                         INVENTORY_STATUS.SOLD_OFFLINE,
+                        INVENTORY_STATUS.SURRENDERED,
                     ]
                 }
                 includeClaims.push({
