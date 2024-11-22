@@ -202,6 +202,14 @@ export class InventoryController extends AppController {
             oapi.validPath(oapiPathDef({
                 summary: 'Delete Claim'
             })),
+            requireLogin,
+            requireOrgAuth(async (req) => {
+                const claim = await this.service.findClaimById(parseInt(req.params.id))
+                if (claim)
+                    return claim.item.orgCode
+
+                throw new NotFound('No such item in inventory')
+            }),
             this.deleteClaim
         )
 

@@ -1123,21 +1123,41 @@ export class InventoryService {
     }
 
     deleteClaim = async (claimId: number) => {
-        const claim = await Claim.findByPk(
-            claimId,
-            {
-                include: [
-                    {
-                        model: Inventory,
-                    },
-                ]
+        const transaction = await mysql.sequelize.transaction()
+
+        try {
+            const claim = await Claim.findByPk(
+                claimId,
+                {
+                    include: [
+                        {
+                            model: Inventory,
+                        },
+                    ],
+                    transaction
+                }
+            )
+
+            if (claim.verified && claim.item.status === INVENTORY_STATUS.CLAIMED)
+                throw new Forbidden('Items has been claimed with this one')
+
+            if (claim.verified) {
+                await claim.update({ verified: false })
+                await claim.item.update(
+                    { status: INVENTORY_STATUS.UNCLAIMED },
+                    { transaction }
+                )
             }
-        )
 
-        if (claim.verified && claim.item.status === INVENTORY_STATUS.CLAIMED)
-            throw new Forbidden('Items has been claimed with this one')
+            await claim.destroy({ transaction })
 
-        return claim.destroy()
+            await transaction.commit()
+
+            return claim
+        } catch(err) {
+            await transaction.rollback()
+            throw err
+        }
     }
 }
 
