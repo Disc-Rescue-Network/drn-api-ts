@@ -124,13 +124,13 @@ export class SMSController extends AppController {
             if (reqBody.initialText) {
                 const optInStatus = await lib.getOptInStatus(reqBody.recipientPhone)
 
-                if (optInStatus === null) {
+                if (!optInStatus || !optInStatus.smsConsent) {
                     // Request opt in
                     await smslib.sendSMS(
                         reqBody.recipientPhone,
-                        optInMessage
+                        defaultMessage
                     )
-                } else if (optInStatus.smsConsent) {
+                } else {
                     // Log the custom SMS
                     await lib.insertSmsLog({
                         ...reqBody,
