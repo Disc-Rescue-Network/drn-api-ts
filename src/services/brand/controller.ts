@@ -30,6 +30,7 @@ export class BrandController extends AppController {
         this.router.get(
             '',
             oapi.validPath(oapiPathDef({
+                includeSearchParam: true,
                 responseData: paginatedResponse(schemas.GetBrandSchema),
                 summary: 'Get Brands'
             })),
