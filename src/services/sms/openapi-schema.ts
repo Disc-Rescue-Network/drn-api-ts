@@ -27,6 +27,25 @@ export default function () {
         associations: false
     })
 
+    const GetPhoneOptInParameters = [
+        {
+            in: 'query',
+            name: 'phoneNumber',
+            schema: {
+                type: 'string'
+            },
+            required: false
+        },
+        {
+            in: 'query',
+            name: 'smsConsent',
+            schema: {
+                type: 'integer'
+            },
+            required: false
+        }
+    ]
+
     const TwilioSMSSchema = {
         type: 'object',
         properties: {
@@ -44,7 +63,10 @@ export default function () {
     return {
         SendSMSSchema,
         UpdatePhoneOptInSchema,
+
         GetPhoneOptInSchema,
+        GetPhoneOptInParameters,
+
         TwilioSMSSchema,
     }
 }

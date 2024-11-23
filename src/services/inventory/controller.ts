@@ -179,7 +179,7 @@ export class InventoryController extends AppController {
         this.router.get(
             '/sms',
             oapi.validPath(oapiPathDef({
-                parameters: schemas.GetSMSSchema,
+                parameters: schemas.GetSMSParameters,
                 summary: 'Get SMS Logs'
             })),
             this.findAllSMS

@@ -192,7 +192,7 @@ export default function () {
         type: 'boolean'
     }
 
-    const GetSMSSchema = [
+    const GetSMSParameters = [
         {
             in: 'query',
             name: 'itemId',
@@ -230,7 +230,7 @@ export default function () {
         ResendVerificationParams,
 
         SendSMSSchema,
-        GetSMSSchema,
+        GetSMSParameters,
 
         GetActivityParameters,
     }

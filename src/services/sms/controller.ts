@@ -89,6 +89,7 @@ export class SMSController extends AppController {
         this.router.get(
             '/phone-opt-in',
             oapi.validPath(oapiPathDef({
+                parameters: schemas.GetPhoneOptInParameters,
                 responseData: paginatedResponse(schemas.GetPhoneOptInSchema),
                 summary: 'Get Phone Opt In'
             })),
