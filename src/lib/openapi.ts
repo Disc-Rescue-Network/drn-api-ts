@@ -73,6 +73,18 @@ export function paginatedResponse(dataSchema: {}) {
             pageSize: {
                 type: 'integer'
             },
+            totalItems: {
+                type: 'integer'
+            },
+            totalPages: {
+                type: 'integer'
+            },
+            hasPreviousPage: {
+                type: 'boolean'
+            },
+            hasNextPage: {
+                type: 'boolean'
+            },
             items: {
                 type: 'array',
                 items: dataSchema
