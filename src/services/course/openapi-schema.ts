@@ -11,7 +11,22 @@ export default function () {
         associations: false
     })
 
+    const GetCourseParameters = [
+        {
+            in: 'query',
+            name: 'orgCode',
+            schema: {
+                type: 'array',
+                items: {
+                    type: 'string'
+                }
+            },
+            required: false
+        }
+    ]
+
     return {
         GetCourseSchema,
+        GetCourseParameters
     }
 }

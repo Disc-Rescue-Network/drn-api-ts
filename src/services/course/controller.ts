@@ -20,6 +20,7 @@ export class CourseController extends AppController {
         this.router.get(
             '',
             oapi.validPath(oapiPathDef({
+                parameters: schemas.GetCourseParameters,
                 responseData: paginatedResponse(GetCourseSchema),
                 summary: 'Get Courses'
             })),
