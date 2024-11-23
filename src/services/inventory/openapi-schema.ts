@@ -203,6 +203,17 @@ export default function () {
         }
     ]
 
+    const GetActivityParameters = [
+        {
+            in: 'query',
+            name: 'itemId',
+            schema: {
+                type: 'integer'
+            },
+            required: false
+        }
+    ]
+
     return {
         CreateInventorySchema,
         UpdateInventorySchema,
@@ -219,6 +230,8 @@ export default function () {
         ResendVerificationParams,
 
         SendSMSSchema,
-        GetSMSSchema
+        GetSMSSchema,
+
+        GetActivityParameters,
     }
 }

@@ -72,6 +72,7 @@ export class InventoryController extends AppController {
         this.router.get(
             '/claim',
             oapi.validPath(oapiPathDef({
+                includeSearchParam: true,
                 responseData: paginatedResponse(schemas.GetClaimSchema),
                 summary: 'Get Claims'
             })),
@@ -150,6 +151,7 @@ export class InventoryController extends AppController {
         this.router.get(
             '/activity',
             oapi.validPath(oapiPathDef({
+                parameters: schemas.GetActivityParameters,
                 summary: 'Get Activities'
             })),
             requireLogin,
