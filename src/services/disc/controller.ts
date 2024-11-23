@@ -30,6 +30,7 @@ export class DiscController extends AppController {
         this.router.get(
             '',
             oapi.validPath(oapiPathDef({
+                includeSearchParam: true,
                 responseData: paginatedResponse(schemas.GetDiscSchema),
                 summary: 'Get Discs'
             })),
