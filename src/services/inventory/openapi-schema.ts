@@ -44,6 +44,36 @@ export default function () {
         associations: false
     })
 
+    const GetInventoryParameters = [
+        {
+            in: 'query',
+            name: 'orgCode',
+            schema: {
+                type: 'string'
+            },
+        },
+        {
+            in: 'query',
+            name: 'nonVerifiedWithClaims',
+            schema: {},
+        },
+        {
+            in: 'query',
+            name: 'nonComplete',
+            schema: {},
+        },
+        {
+            in: 'query',
+            name: 'nonPending',
+            schema: {},
+        },
+        {
+            in: 'query',
+            name: 'nonVerified',
+            schema: {},
+        }
+    ]
+
     const CreateClaimSchema = schemaManager.generate(Claim, strategy, {
         exclude: [
             'tofAccepted',
@@ -177,6 +207,7 @@ export default function () {
         CreateInventorySchema,
         UpdateInventorySchema,
         GetInventorySchema,
+        GetInventoryParameters,
 
         GetClaimSchema,
         CreateClaimSchema,

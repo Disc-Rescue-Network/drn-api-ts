@@ -61,6 +61,8 @@ export class InventoryController extends AppController {
             '',
             oapi.validPath(oapiPathDef({
                 includePaginationParams: true,
+                includeSearchParam: true,
+                parameters: schemas.GetInventoryParameters,
                 responseData: paginatedResponse(GetInventorySchema),
                 summary: 'Get Inventory'
             })),
