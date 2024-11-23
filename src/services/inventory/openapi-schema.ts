@@ -56,21 +56,25 @@ export default function () {
             in: 'query',
             name: 'nonVerifiedWithClaims',
             schema: {},
+            allowEmptyValue: true
         },
         {
             in: 'query',
             name: 'nonComplete',
             schema: {},
+            allowEmptyValue: true
         },
         {
             in: 'query',
             name: 'nonPending',
             schema: {},
+            allowEmptyValue: true
         },
         {
             in: 'query',
             name: 'nonVerified',
             schema: {},
+            allowEmptyValue: true
         }
     ]
 
