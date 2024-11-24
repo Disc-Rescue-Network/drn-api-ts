@@ -7,7 +7,7 @@ import PlasticType from './plastic-type'
 @Table({
     indexes: [
         {
-            fields: ['name', 'brandId'],
+            fields: ['name', 'plasticType', 'brandId'],
             unique: true
         }
     ]
