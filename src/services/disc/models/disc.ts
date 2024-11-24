@@ -1,6 +1,7 @@
 import { BelongsTo, ForeignKey, Column, Table, Model, Length } from 'sequelize-typescript'
 
 import Brand from '../../brand/models/brand'
+import PlasticType from './plastic-type'
 
 
 @Table({
@@ -46,6 +47,13 @@ export default class DiscMold extends Model {
 
     @BelongsTo(() => Brand, { onDelete: 'CASCADE' })
     brand: Brand
+
+    @ForeignKey(() => PlasticType)
+    @Column
+    plasticTypeId: number
+
+    @BelongsTo(() => PlasticType, { onDelete: 'SET NULL' })
+    plasticTypeObj: PlasticType
 }
 
 
