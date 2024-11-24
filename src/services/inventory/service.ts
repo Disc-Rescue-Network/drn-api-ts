@@ -563,7 +563,10 @@ export class InventoryService {
                     eventName: 'newClaim',
                     message: notif.message,
                     notificationId: notif.id,
-                    data: currentClaim
+                    data: {
+                        ...notif.dataValues,
+                        claim: currentClaim
+                    }
                 }
             )
 
@@ -1033,7 +1036,10 @@ export class InventoryService {
                     eventName: 'claimTicket',
                     message: notif.message,
                     notificationId: notif.id,
-                    data: claim
+                    data: {
+                        ...notif.dataValues,
+                        claim
+                    }
                 }
             )
 
