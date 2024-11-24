@@ -50,10 +50,10 @@ export default class DiscMold extends Model {
 
     @ForeignKey(() => PlasticType)
     @Column
-    plasticTypeId: number
+    plasticTypeId?: number
 
     @BelongsTo(() => PlasticType, { onDelete: 'SET NULL' })
-    plasticTypeObj: PlasticType
+    plasticTypeObj?: PlasticType
 }
 
 
