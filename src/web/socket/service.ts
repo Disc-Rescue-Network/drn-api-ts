@@ -7,6 +7,7 @@ import type { RedisClientType } from 'redis'
 import type { JwtPayload } from 'jsonwebtoken'
 
 import { Room, RoomConnection, WebSocketMessage } from './types'
+import { KEEP_ALIVE_INTERVAL, KEEP_ALIVE_TIMEOUT } from './constant'
 
 import store from '../../store'
 import config from '../../config'
@@ -18,12 +19,12 @@ import { decodeToken } from '../../lib/auth'
 export class ExtWebSocket extends WebSocket {
     uid: string
 
-    private keepAliveInterval: number;
-    private keepAliveTimeout: number;
-    private keepAliveIntervalId: NodeJS.Timeout;
-    private keepAliveTimeoutId: NodeJS.Timeout;
+    private keepAliveInterval: number
+    private keepAliveTimeout: number
+    private keepAliveIntervalId: NodeJS.Timeout
+    private keepAliveTimeoutId: NodeJS.Timeout
 
-    setKeepAlive(interval: number = 2000, timeout: number = 10000) {
+    setKeepAlive(interval: number = KEEP_ALIVE_INTERVAL, timeout: number = KEEP_ALIVE_TIMEOUT) {
         const self = this
 
         this.keepAliveInterval = interval
@@ -79,9 +80,9 @@ export class SocketService {
     async init(server: http.Server) {
         store.registerCallback('socket-cleanup', this.cleanup)
 
-        const pubsub = await store.pubsub();
-        this.publisher = pubsub.publisher;
-        this.subscriber = pubsub.subscriber;
+        const pubsub = await store.pubsub()
+        this.publisher = pubsub.publisher
+        this.subscriber = pubsub.subscriber
 
         this.wss = new WebSocketServer({ server })
         this.wss.on('connection', this.onConnection)
@@ -125,7 +126,7 @@ export class SocketService {
         }
 
         const onError = (err: Error) => { console.error(err) }
-        ws.on('error', onError);
+        ws.on('error', onError)
 
         ws.setKeepAlive()
 
@@ -154,7 +155,7 @@ export class SocketService {
                 if (member)
                     return ws.send(JSON.stringify({ message: 'Already in the room. If you are trying to connect from different client, disconnect that client first.' }), this.onSend)
 
-                this.conns[message.roomId][ws.uid] = ws;
+                this.conns[message.roomId][ws.uid] = ws
 
                 const members = await Promise.all([
                     store.getMatched(`<${config.serviceName}>room<${message.roomId}>member<*>profile`)
@@ -188,9 +189,9 @@ export class SocketService {
                     uid: ws.uid
                 }))
             } else if (message.eventName == 'leave') {
-                if(!this.conns[message.roomId]) return;
+                if(!this.conns[message.roomId]) return
 
-                if(!this.conns[message.roomId][ws.uid]) return;
+                if(!this.conns[message.roomId][ws.uid]) return
 
                 await store.delValue(`<${config.serviceName}>room<${message.roomId}>member<${ws.uid}>profile`)
 
@@ -202,7 +203,7 @@ export class SocketService {
                     uid: ws.uid,
                 }))
             }
-        };
+        }
         ws.on('message', onMessage)
 
         const onClose = async () => {
@@ -226,7 +227,7 @@ export class SocketService {
         }
         ws.on('close', onClose)
 
-        ws.send(JSON.stringify({ eventName: 'connected' }), this.onSend);
+        ws.send(JSON.stringify({ eventName: 'connected' }), this.onSend)
     }
 
     cleanup = async () => {
@@ -279,7 +280,7 @@ export class SocketService {
 
     async initRoom(rooms: Room[]) {
         rooms.map(async (room) => {
-            this.conns[room.id] = {};
+            this.conns[room.id] = {}
             await this.subscriber.subscribe(room.id, this.onMessage)
         })
     }
@@ -384,4 +385,4 @@ export class SocketService {
 }
 
 
-export default new SocketService;
+export default new SocketService

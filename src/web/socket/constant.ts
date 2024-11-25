@@ -1,0 +1,2 @@
+export const KEEP_ALIVE_INTERVAL = 2000
+export const KEEP_ALIVE_TIMEOUT = 10000
