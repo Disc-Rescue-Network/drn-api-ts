@@ -21,6 +21,7 @@ import disc from '../services/disc'
 import sms from '../services/sms'
 import ai from '../services/ai'
 import notification from '../services/notification'
+import ticket from '../services/ticket'
 
 import healthCheck from './healthcheck'
 
@@ -76,6 +77,7 @@ export class Web {
         sms.init()
         ai.init()
         notification.init()
+        ticket.init()
 
         this.add(oapi)
 
@@ -87,6 +89,7 @@ export class Web {
         this.add(sms.router, sms.basePath)
         this.add(ai.router, ai.basePath)
         this.add(notification.router, notification.basePath)
+        this.add(ticket.router, ticket.basePath)
 
         this.add(storeErrorHandler)
         this.add(oapiErrorHandler)

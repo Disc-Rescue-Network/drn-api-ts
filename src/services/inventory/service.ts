@@ -32,6 +32,8 @@ import socketService from '../../web/socket/service'
 import notificationLib from '../notification/lib'
 import { NOTIFICATION_TYPE } from '../notification/constant'
 
+import ticketLib from '../ticket/lib'
+
 import userLib from '../user/lib'
 import { ACTIVITY_TYPE, ACTIVITY_TARGET } from '../user/constant'
 import Activity from '../user/models/activity'
@@ -538,6 +540,14 @@ export class InventoryService {
                 transaction
             )
 
+            const ticket = await ticketLib.create(
+                {
+                    notificationId: notif.id,
+                    orgCode: notif.orgCode,
+                },
+                transaction
+            )
+
             if (data.phoneNumber) {
                 await smslib.sendSMS(
                     data.phoneNumber,
@@ -565,6 +575,7 @@ export class InventoryService {
                     notificationId: notif.id,
                     data: {
                         ...notif.dataValues,
+                        ticket,
                         claim: currentClaim
                     }
                 }
@@ -1030,6 +1041,14 @@ export class InventoryService {
                 transaction
             )
 
+            const ticket = await ticketLib.create(
+                {
+                    notificationId: notif.id,
+                    orgCode: notif.orgCode,
+                },
+                transaction
+            )
+
             await socketService.sendToRoom(
                 claim.pickup.course.orgCode,
                 {
@@ -1038,6 +1057,7 @@ export class InventoryService {
                     notificationId: notif.id,
                     data: {
                         ...notif.dataValues,
+                        ticket,
                         claim
                     }
                 }
