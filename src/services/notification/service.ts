@@ -38,8 +38,6 @@ export class NotificationService {
             include,
             offset: pageOptions.offset,
             limit: pageOptions.limit,
-            raw: true,
-            nest: true
         }
 
         const result = await Notification.findAndCountAll(query)
