@@ -1,8 +1,9 @@
-import { BelongsTo, ForeignKey, DataType, Column, Table, Model } from 'sequelize-typescript'
+import { HasOne, BelongsTo, ForeignKey, DataType, Column, Table, Model } from 'sequelize-typescript'
 
 import { NOTIFICATION_TYPE, NOTIFICATION_STATUS } from '../constant'
 
 import Course from '../../course/models/course'
+import NotificationTicket from '../../ticket/models/notification-ticket'
 
 
 @Table
@@ -39,7 +40,10 @@ export default class Notification extends Model {
 
     @BelongsTo(() => Course, { onDelete: 'CASCADE', foreignKey: 'orgCode', targetKey: 'orgCode'})
     course: Course
+
+    @HasOne(() => NotificationTicket)
+    nt: NotificationTicket | null
 }
 
 
-export type NotificationData = Omit<Notification, keyof Model | 'course'>
+export type NotificationData = Omit<Notification, keyof Model | 'course' | 'nt'>

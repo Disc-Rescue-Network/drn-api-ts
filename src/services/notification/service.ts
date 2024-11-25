@@ -2,6 +2,9 @@ import { Page, PageOptions } from '../../lib/pagination'
 
 import Notification from './models/notification'
 
+import Ticket from '../ticket/models/ticket'
+import NotificationTicket from '../ticket/models/notification-ticket'
+
 import { NOTIFICATION_TYPE, NOTIFICATION_STATUS } from './constant'
 
 import inventoryLib from '../../services/inventory/lib'
@@ -23,8 +26,16 @@ export class NotificationService {
         orgCode: string
     ) => {
         const where: any = { orgCode }
+        const include = [
+            {
+                model: NotificationTicket,
+                include: [Ticket]
+            }
+        ]
+
         const query = {
             where,
+            include,
             offset: pageOptions.offset,
             limit: pageOptions.limit,
             raw: true,
