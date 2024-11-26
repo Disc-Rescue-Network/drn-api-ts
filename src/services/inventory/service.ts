@@ -913,23 +913,16 @@ export class InventoryService {
 
                 let setDateTexted = false
 
-                if (optInStatus === null) {
-                    // request opt in
+                if (optInStatus === null || !optInStatus.smsConsent) {
+                    // Request opt in
                     await smslib.sendSMS(
                         recipientPhone,
                         optInMessage
                     )
 
                     setDateTexted = true
-                } else if (optInStatus.smsConsent) {
-                    // Log the custom SMS
-                    await smslib.insertSmsLog({
-                        ...data,
-                        recipientPhone,
-                        sentAt: new Date(),
-                    }, transaction)
-
-                    // user is opted in, send text
+                } else {
+                    // User is opted in, send text
                     await smslib.sendSMS(
                         recipientPhone,
                         data.message

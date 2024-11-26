@@ -244,19 +244,21 @@ export class InventoryController extends AppController {
                 const optInStatus = await smslib.getOptInStatus(body.phoneNumber)
 
                 let setDateTexted = false
-                if (optInStatus === null) {
-                    // request opt in
+                if (optInStatus === null || !optInStatus.smsConsent) {
+                    // Request opt in
                     await smslib.sendSMS(
                         body.phoneNumber,
                         optInMessage
                     )
+
                     setDateTexted = true
-                } else if (optInStatus.smsConsent) {
-                    // user is opted in, send text
+                } else {
+                    // User is opted in, send text
                     await smslib.sendSMS(
                         body.phoneNumber,
                         formatClaimInventoryMessage(unclaimedData.length)
                     )
+
                     setDateTexted = true
                 }
 
