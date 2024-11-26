@@ -1,6 +1,6 @@
 import { Dialect } from 'sequelize'
 
-import { ArrayNotEmpty, validateOrReject, IsArray, IsInt, IsString, IsEmail } from 'class-validator'
+import { IsUrl, ArrayNotEmpty, validateOrReject, IsArray, IsInt, IsString, IsEmail } from 'class-validator'
 
 
 export class DatabaseConfig {
@@ -89,6 +89,9 @@ export class EnvConfig {
     @IsString()
     drnApp: string
 
+    @IsUrl()
+    drnLogo: string
+
     @IsInt()
     defaultPage: number = 1
 
@@ -138,6 +141,7 @@ export class EnvConfig {
         this.drnAdminsOrgCode = process.env.DRN_ADMINS_ORG_CODE
         this.drnOpenTicket = process.env.DRN_OPEN_TICKET
         this.drnApp = process.env.DRN_APP
+        this.drnLogo = process.env.DRN_LOGO
 
         this.allowedHosts = process.env.ALLOWED_HOSTS?.split(',')
 
