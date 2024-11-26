@@ -1109,7 +1109,9 @@ export class InventoryService {
                     `Your claim has been rejected by a course admin. If you feel this is a mistake, please submit a ticket: app.discrescuenetwork.com/support-ticket?claimId=${claim.id}`
                 )
             } else {
-                const soString = this.getFormattedScheduleDate(claim.pickup.scheduledOn)
+                let soString = this.getFormattedScheduleDate(claim.pickup.scheduledOn)
+                if (soString === 'Invalid Date')
+                    soString = null
 
                 await sendClaimRejectionEmail(
                     claim.email,
@@ -1120,8 +1122,7 @@ export class InventoryService {
                         brand: claim.item.disc.brand.name,
                         plasticType: claim.item.disc.plasticType,
                         courseName: claim.pickup.course.name,
-                        pickupDate: soString.split(' @ ')[0],
-                        pickupTime: soString.split(' @ ')[1],
+                        pickupSchedule: soString ? soString.replace(' @ ', ' ') : 'NA'
                     }
                 )
             }

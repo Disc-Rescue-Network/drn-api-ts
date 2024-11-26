@@ -99,8 +99,7 @@ function sendClaimRejectionEmail(
         color: string,
         plasticType: string
         brand: string,
-        pickupDate: string,
-        pickupTime: string,
+        pickupSchedule: string
     }
 ) {
     return sendMail({
