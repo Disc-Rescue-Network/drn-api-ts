@@ -12,6 +12,7 @@ import {
     sendPCMVerificationEmail,
     sendPickupConfirmationEmail,
     sendPickupCompleteEmail,
+    sendClaimRejectionEmail,
 } from './mail'
 
 import Disc from '../disc/models/disc'
@@ -24,11 +25,12 @@ import { Forbidden, NotFound, ConflictError } from '../../lib/error'
 
 import smslib from '../sms/lib'
 import { optInMessage } from '../sms/message'
-import { SMSLogsData } from '../sms/models/sms-logs'
+import SMSLogs, { SMSLogsData } from '../sms/models/sms-logs'
 
 import mysql from '../../store/mysql'
 
 import socketService from '../../web/socket/service'
+
 import notificationLib from '../notification/lib'
 import { NOTIFICATION_TYPE } from '../notification/constant'
 
@@ -37,7 +39,6 @@ import ticketLib from '../ticket/lib'
 import userLib from '../user/lib'
 import { ACTIVITY_TYPE, ACTIVITY_TARGET } from '../user/constant'
 import Activity from '../user/models/activity'
-import SMSLogs from '../sms/models/sms-logs'
 
 import config from '../../config'
 
@@ -1082,7 +1083,17 @@ export class InventoryService {
                     include: [
                         {
                             model: Inventory,
+                            include: [
+                                {
+                                    model: Disc,
+                                    include: [Brand]
+                                }
+                            ]
                         },
+                        {
+                            model: Pickup,
+                            include: [Course]
+                        }
                     ],
                     transaction
                 }
@@ -1096,6 +1107,25 @@ export class InventoryService {
                 await claim.item.update(
                     { status: INVENTORY_STATUS.UNCLAIMED },
                     { transaction }
+                )
+            }
+
+            if (claim.phoneNumber) {
+                await smslib.sendSMS(
+                    claim.phoneNumber,
+                    `Your claim has been rejected by a course admin. If you feel this is a mistake, please submit a ticket: app.discrescuenetwork.com/support-ticket?claimId=${claim.id}`
+                )
+            } else {
+                await sendClaimRejectionEmail(
+                    claim.email,
+                    {
+                        claimId: claim.id,
+                        discName: claim.item.disc.name,
+                        color: claim.item.color,
+                        brand: claim.item.disc.brand.name,
+                        plasticType: claim.item.disc.plasticType,
+                        courseName: claim.pickup.course.name,
+                    }
                 )
             }
 

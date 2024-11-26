@@ -1,5 +1,3 @@
-import { Page, PageOptions } from '../../lib/pagination'
-
 import Notification from './models/notification'
 
 import Ticket from '../ticket/models/ticket'
@@ -9,6 +7,7 @@ import { NOTIFICATION_TYPE, NOTIFICATION_STATUS } from './constant'
 
 import inventoryLib from '../../services/inventory/lib'
 
+import { Page, PageOptions } from '../../lib/pagination'
 import { NotFound } from '../../lib/error'
 
 
