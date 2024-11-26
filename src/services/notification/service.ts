@@ -52,7 +52,7 @@ export class NotificationService {
             for (const notif of claimNotifs) {
                 for (const claim of claimObjects) {
                     if (notif.objectId === claim.id)
-                        notif['claim'] = claim
+                        notif.dataValues['claim'] = claim
                 }
             }
         }
