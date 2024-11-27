@@ -1162,7 +1162,7 @@ export class InventoryService {
                         if (claim.phoneNumber) {
                             await smslib.sendSMS(
                                 claim.phoneNumber,
-                                `Your ticket related to claim {claim.id} has been marked as resolved by a course admin. If you feel this is a mistake, please reply TICKET or email the DRN support staff: support@discrescuenetwork.com`
+                                `Your ticket related to claim ${claim.id} has been marked as resolved by a course admin. If you feel this is a mistake, please reply TICKET or email the DRN support staff: support@discrescuenetwork.com`
                             )
                         } else
                             await sendTicketResolutionEmail(claim.email)

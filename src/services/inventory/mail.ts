@@ -121,7 +121,7 @@ function sendTicketResolutionEmail(
     return sendMail({
         ...defaultMailOptions,
         to,
-        subject: 'Claim Resolved',
+        subject: 'Ticket Resolved',
         html: ticketResolutionTemplate({
             logo: config.drnLogo
         })
