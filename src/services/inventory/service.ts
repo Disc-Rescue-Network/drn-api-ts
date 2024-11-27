@@ -546,14 +546,6 @@ export class InventoryService {
                 transaction
             )
 
-            const ticket = await ticketLib.create(
-                {
-                    notificationId: notif.id,
-                    orgCode: notif.orgCode,
-                },
-                transaction
-            )
-
             if (data.phoneNumber) {
                 await smslib.sendSMS(
                     data.phoneNumber,
@@ -581,7 +573,6 @@ export class InventoryService {
                     notificationId: notif.id,
                     data: {
                         ...notif.dataValues,
-                        ticket,
                         claim: currentClaim
                     }
                 }
