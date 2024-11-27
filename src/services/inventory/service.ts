@@ -422,7 +422,7 @@ export class InventoryService {
         )
 
         if (claim.item.status !== INVENTORY_STATUS.UNCLAIMED)
-            throw new NotFound('Disc is no longer up for claim')
+            throw new Forbidden('Item was claimed by someone else')
 
         const otp = generateOTP()
         const message = `DRN: Looks like you found your disc in one of our beacons. Use code "${otp}" to verify that it's really you.`
@@ -469,7 +469,7 @@ export class InventoryService {
                 throw new Forbidden('Pickup should mention the same course where the disc was recovered from')
 
             if (item.status !== INVENTORY_STATUS.UNCLAIMED)
-                throw new Forbidden('The item is no longer up for claim')
+                throw new Forbidden('Item was claimed by someone else')
 
             const prevClaim = await Claim.findOne({
                 where: {
@@ -649,8 +649,8 @@ export class InventoryService {
             if (!pickup.claim.verified)
                 throw new Forbidden('Pickup can not be confirmed without verification')
 
-            if ([ INVENTORY_STATUS.CLAIMED, INVENTORY_STATUS.SOLD, INVENTORY_STATUS.FOR_SALE, INVENTORY_STATUS.SURRENDERED, INVENTORY_STATUS.SOLD_OFFLINE ].includes(pickup.claim.item.status))
-                throw new Forbidden('The item is no longer up for claim')
+            if (pickup.claim.item.status !== INVENTORY_STATUS.UNCLAIMED)
+                throw new Forbidden('Item was claimed by someone else')
 
             if (pickup.claim.surrendered)
                 throw new Forbidden('The item is to be surrendered')
