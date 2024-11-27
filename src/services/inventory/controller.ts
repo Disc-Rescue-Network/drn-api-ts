@@ -259,29 +259,31 @@ export class InventoryController extends AppController {
                     body.phoneNumber
                 )
 
-                const optInStatus = await smslib.getOptInStatus(body.phoneNumber)
+                if (body.phoneNumber) {
+                    const optInStatus = await smslib.getOptInStatus(body.phoneNumber)
 
-                let setDateTexted = false
-                if (optInStatus === null || !optInStatus.smsConsent) {
-                    // Request opt in
-                    await smslib.sendSMS(
-                        body.phoneNumber,
-                        optInMessage
-                    )
+                    let setDateTexted = false
+                    if (!optInStatus) {
+                        // Request opt in
+                        await smslib.sendSMS(
+                            body.phoneNumber,
+                            optInMessage
+                        )
 
-                    setDateTexted = true
-                } else {
-                    // User is opted in, send text
-                    await smslib.sendSMS(
-                        body.phoneNumber,
-                        formatClaimInventoryMessage(unclaimedData.length)
-                    )
+                        setDateTexted = true
+                    } else if (optInStatus.smsConsent) {
+                        // User is opted in, send text
+                        await smslib.sendSMS(
+                            body.phoneNumber,
+                            formatClaimInventoryMessage(unclaimedData.length)
+                        )
 
-                    setDateTexted = true
-                }
+                        setDateTexted = true
+                    }
 
-                if (setDateTexted) {
-                    body.dateTexted = new Date(new Date().toISOString().split("T")[0])
+                    if (setDateTexted) {
+                        body.dateTexted = new Date(new Date().toISOString().split("T")[0])
+                    }
                 }
             }
 

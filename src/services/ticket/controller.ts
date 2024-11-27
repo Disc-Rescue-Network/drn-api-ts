@@ -25,7 +25,7 @@ export class TicketController extends AppController {
             '',
             oapi.validPath(oapiPathDef({
                 requestBodySchema: schemas.CreateTicketSchema,
-                summary: 'Create Tickets'
+                summary: 'Create Ticket'
             })),
             requireLogin,
             this.create

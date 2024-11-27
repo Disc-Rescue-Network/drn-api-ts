@@ -909,7 +909,7 @@ export class InventoryService {
 
                 let setDateTexted = false
 
-                if (optInStatus === null || !optInStatus.smsConsent) {
+                if (!optInStatus) {
                     // Request opt in
                     await smslib.sendSMS(
                         recipientPhone,
@@ -917,7 +917,7 @@ export class InventoryService {
                     )
 
                     setDateTexted = true
-                } else {
+                } else if (optInStatus.smsConsent) {
                     // User is opted in, send text
                     await smslib.sendSMS(
                         recipientPhone,
@@ -925,6 +925,8 @@ export class InventoryService {
                     )
 
                     setDateTexted = true
+                } else {
+                    throw new Forbidden('User has opted out')
                 }
 
                 if (setDateTexted) {
