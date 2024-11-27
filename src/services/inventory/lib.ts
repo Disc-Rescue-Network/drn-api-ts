@@ -22,7 +22,7 @@ export class InventoryLib {
         })
     }
 
-    getClaims = async (id: number[]) => {
+    getClaims = async (id: number[], paranoid = true) => {
         return Claim.findAll({
             where: { id },
             include: [
@@ -35,6 +35,7 @@ export class InventoryLib {
                     include: [Course]
                 }
             ],
+            paranoid
         })
     }
 }

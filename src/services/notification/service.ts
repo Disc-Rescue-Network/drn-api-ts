@@ -48,7 +48,10 @@ export class NotificationService {
                     claimNotifs.push(res)
             }
 
-            const claimObjects = await inventoryLib.getClaims(claimNotifs.map(notif => { return notif.objectId }))
+            const claimObjects = await inventoryLib.getClaims(
+                claimNotifs.map(notif => { return notif.objectId }),
+                false
+            )
             for (const notif of claimNotifs) {
                 for (const claim of claimObjects) {
                     if (notif.objectId === claim.id)
