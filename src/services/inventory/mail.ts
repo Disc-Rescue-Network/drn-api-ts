@@ -11,6 +11,7 @@ const pcmVerificationTemplate = Handlebars.compile(fs.readFileSync(join(__dirnam
 const pickupConfirmationTemplate = Handlebars.compile(fs.readFileSync(join(__dirname, 'template', 'confirm-pickup.hbs'), 'utf8'))
 const pickupCompleteTemplate = Handlebars.compile(fs.readFileSync(join(__dirname, 'template', 'complete-pickup.hbs'), 'utf8'))
 const claimRejectionTemplate = Handlebars.compile(fs.readFileSync(join(__dirname, 'template', 'claim-rejection.hbs'), 'utf8'))
+const ticketResolutionTemplate = Handlebars.compile(fs.readFileSync(join(__dirname, 'template', 'ticket-resolution.hbs'), 'utf8'))
 
 const defaultMailOptions = {
     from: {
@@ -114,9 +115,23 @@ function sendClaimRejectionEmail(
     })
 }
 
+function sendTicketResolutionEmail(
+    to: string,
+) {
+    return sendMail({
+        ...defaultMailOptions,
+        to,
+        subject: 'Claim Resolved',
+        html: ticketResolutionTemplate({
+            logo: config.drnLogo
+        })
+    })
+}
+
 export {
     sendPCMVerificationEmail,
     sendPickupConfirmationEmail,
     sendPickupCompleteEmail,
-    sendClaimRejectionEmail
+    sendClaimRejectionEmail,
+    sendTicketResolutionEmail,
 }

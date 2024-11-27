@@ -30,6 +30,10 @@ export class TicketService {
         }
     }
 
+    findById = async (id: number) => {
+        return Ticket.findByPk(id)
+    }
+
     findAll = async (
         pageOptions: PageOptions,
         orgCode: string,

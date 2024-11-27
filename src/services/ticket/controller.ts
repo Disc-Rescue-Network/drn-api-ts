@@ -5,11 +5,12 @@ import { plainToClass } from 'class-transformer'
 import AppController from '../../lib/app-controller'
 import oapi, { oapiPathDef, paginatedResponse } from '../../lib/openapi'
 import { PageOptions } from '../../lib/pagination'
+import { NotFound } from '../../lib/error'
 
-import notificationService from './service'
+import ticketService from './service'
 import generate from './openapi-schema'
 
-import { requireLogin } from '../../web/middleware'
+import { requireLogin, requireOrgAuth } from '../../web/middleware'
 
 
 export class TicketController extends AppController {
@@ -18,7 +19,7 @@ export class TicketController extends AppController {
 
         this.basePath = '/ticket'
 
-        notificationService.init()
+        ticketService.init()
 
         this.router.post(
             '',
@@ -48,6 +49,13 @@ export class TicketController extends AppController {
                 summary: 'Update Ticket'
             })),
             requireLogin,
+            requireOrgAuth(async (req) => {
+                const ticket = await ticketService.findById(parseInt(req.body.id))
+                if (ticket)
+                    return ticket.orgCode
+
+                throw new NotFound('No such ticket')
+            }),
             this.updateStatus
         )
 
@@ -56,7 +64,7 @@ export class TicketController extends AppController {
 
     create = AppController.asyncHandler(
         async (req: Request) => {
-            return notificationService.create({
+            return ticketService.create({
                 ...req.body,
                 orgCode: req.auth.payload.org_code
             })
@@ -65,7 +73,7 @@ export class TicketController extends AppController {
 
     findAll = AppController.asyncHandler(
         async (req: Request) => {
-            return notificationService.findAll(
+            return ticketService.findAll(
                 plainToClass(PageOptions, req.query),
                 req.auth.payload.org_code as string,
                 parseInt(req.query.notificationId as string)
@@ -75,7 +83,7 @@ export class TicketController extends AppController {
 
     updateStatus = AppController.asyncHandler(
         async (req: Request) => {
-            return notificationService.updateStatus(req.body)
+            return ticketService.updateStatus(req.body)
         }
     )
 }

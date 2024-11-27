@@ -15,6 +15,8 @@ import { formatClaimInventoryMessage, optInMessage } from '../sms/message'
 
 import { requireLogin, requireOrgAuth } from '../../web/middleware'
 
+import ticketService from '../ticket/service'
+
 
 export class InventoryController extends AppController {
     public service = inventoryService
@@ -209,6 +211,22 @@ export class InventoryController extends AppController {
             this.deleteClaim
         )
 
+        this.router.patch(
+            '/claim/ticket',
+            oapi.validPath(oapiPathDef({
+                summary: 'Update Claim Ticket'
+            })),
+            requireLogin,
+            requireOrgAuth(async (req) => {
+                const ticket = await ticketService.findById(parseInt(req.body.id))
+                if (ticket)
+                    return ticket.orgCode
+
+                throw new NotFound('No such ticket')
+            }),
+            this.updateClaimTicket
+        )
+
         return this
     }
 
@@ -371,6 +389,12 @@ export class InventoryController extends AppController {
     deleteClaim = AppController.asyncHandler(
         async (req: Request) => {
             return inventoryService.deleteClaim(parseInt(req.params.id))
+        }
+    )
+
+    updateClaimTicket = AppController.asyncHandler(
+        async (req: Request) => {
+            return inventoryService.updateClaimTicket(req.body)
         }
     )
 }

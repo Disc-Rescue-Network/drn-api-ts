@@ -13,6 +13,7 @@ import {
     sendPickupConfirmationEmail,
     sendPickupCompleteEmail,
     sendClaimRejectionEmail,
+    sendTicketResolutionEmail,
 } from './mail'
 
 import Disc from '../disc/models/disc'
@@ -33,8 +34,12 @@ import socketService from '../../web/socket/service'
 
 import notificationLib from '../notification/lib'
 import { NOTIFICATION_TYPE } from '../notification/constant'
+import Notification from '../notification/models/notification'
 
+import Ticket, { TicketData } from '../ticket/models/ticket'
+import NotificationTicket from '../ticket/models/notification-ticket'
 import ticketLib from '../ticket/lib'
+import { TICKET_STATUS } from '../ticket/constant'
 
 import userLib from '../user/lib'
 import { ACTIVITY_TYPE, ACTIVITY_TARGET } from '../user/constant'
@@ -1132,6 +1137,49 @@ export class InventoryService {
             await transaction.commit()
 
             return claim
+        } catch(err) {
+            await transaction.rollback()
+            throw err
+        }
+    }
+
+    updateClaimTicket = async (data: TicketData & { id: number }) => {
+        const transaction = await mysql.sequelize.transaction()
+
+        try {
+            const ticket = await Ticket.findByPk(
+                data.id,
+                {
+                    include: [
+                        {
+                            model: NotificationTicket,
+                            include: [Notification]
+                        }
+                    ],
+                    transaction
+                }
+            )
+
+            await ticket.update({ status: data.status, message: data.message }, { transaction })
+
+            if (data.status === TICKET_STATUS.RESOLVED) {
+                if (ticket.nt) {
+                    if (ticket.nt.notification.objectType === NOTIFICATION_TYPE.CLAIM_TICKET) {
+                        const claim = await Claim.findByPk(ticket.nt.notification.objectId, { transaction })
+                        if (claim.phoneNumber) {
+                            await smslib.sendSMS(
+                                claim.phoneNumber,
+                                `Your ticket related to claim {claim.id} has been marked as resolved by a course admin. If you feel this is a mistake, please reply TICKET or email the DRN support staff: support@discrescuenetwork.com`
+                            )
+                        } else
+                            await sendTicketResolutionEmail(claim.email)
+                    }
+                }
+            }
+
+            await transaction.commit()
+
+            return 'Record updated'
         } catch(err) {
             await transaction.rollback()
             throw err
