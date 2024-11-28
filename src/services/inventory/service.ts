@@ -833,8 +833,8 @@ export class InventoryService {
             if (!pickup)
                 throw new NotFound('No such pickup')
 
-            if ([ INVENTORY_STATUS.CLAIMED, INVENTORY_STATUS.SOLD, INVENTORY_STATUS.FOR_SALE, INVENTORY_STATUS.SURRENDERED, INVENTORY_STATUS.SOLD_OFFLINE ].includes(pickup.claim.item.status))
-                throw new Forbidden('Item is no longer up for pickup')
+            if (pickup.claim.item.status !== INVENTORY_STATUS.UNCLAIMED)
+                throw new Forbidden('Item was claimed by someone else')
 
             if (!pickup.claim.verified)
                 throw new Forbidden('Item hand-over is not allowed as claim has not been verified')
