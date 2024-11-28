@@ -725,15 +725,15 @@ export class InventoryService {
                     }
                 )
 
-                const mails = []
+                const messages = []
                 for (const claim of otherClaims) {
                     if (claim.phoneNumber) {
-                        mails.push(smslib.sendSMS(
+                        messages.push(smslib.sendSMS(
                             claim.phoneNumber,
                             `Your claim has been rejected by a course admin. If you feel this is a mistake, please submit a ticket: app.discrescuenetwork.com/support-ticket?claimId=${claim.id}`
                         ))
                     } else {
-                        mails.push(sendClaimRejectionEmail(
+                        messages.push(sendClaimRejectionEmail(
                             claim.email,
                             {
                                 claimId: claim.id,
@@ -748,7 +748,7 @@ export class InventoryService {
                     }
                 }
 
-                await Promise.all(mails)
+                await Promise.all(messages)
             }
 
             if (pickup.claim.phoneNumber) {
