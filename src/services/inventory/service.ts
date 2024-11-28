@@ -698,7 +698,62 @@ export class InventoryService {
                 message = `Your pickup has been modified by the ${pickup.course.name}. Your new pickup date is ${soString}. If you need to change or adjust your pickup text Ticket to open a ticket.`
             }
 
-            if (pickup.claim.email) {
+            if (data.scheduledOn) {
+                const otherClaims = await Claim.findAll(
+                    {
+                        where: {
+                            itemId: pickup.claim.itemId,
+                            id: {
+                                [Op.ne]: pickup.claim.id
+                            }
+                        },
+                        include: [
+                            {
+                                model: Inventory,
+                                include: [
+                                    {
+                                        model: Disc,
+                                        include: [Brand]
+                                    }
+                                ]
+                            },
+                            {
+                                model: Pickup,
+                                include: [Course]
+                            }
+                        ]
+                    }
+                )
+
+                const mails = []
+                for (const claim of otherClaims) {
+                    if (claim.phoneNumber) {
+                        mails.push(smslib.sendSMS(
+                            claim.phoneNumber,
+                            `Your claim has been rejected by a course admin. If you feel this is a mistake, please submit a ticket: app.discrescuenetwork.com/support-ticket?claimId=${claim.id}`
+                        ))
+                    } else {
+                        mails.push(sendClaimRejectionEmail(
+                            claim.email,
+                            {
+                                claimId: claim.id,
+                                discName: claim.item.disc.name,
+                                color: claim.item.color,
+                                brand: claim.item.disc.brand.name,
+                                plasticType: claim.item.disc.plasticType,
+                                courseName: claim.pickup.course.name,
+                                pickupSchedule: soString.replace(' @ ', ' ')
+                            }
+                        ))
+                    }
+                }
+
+                await Promise.all(mails)
+            }
+
+            if (pickup.claim.phoneNumber) {
+                await smslib.sendSMS(pickup.claim.phoneNumber, message)
+            } else {
                 await sendPickupConfirmationEmail(pickup.claim.email, {
                     claimId: pickup.claim.id,
                     status: data.scheduledOn ? 'confirmed' : 'rescheduled',
@@ -709,8 +764,6 @@ export class InventoryService {
                     pickupDate: soString.split(' @ ')[0],
                     pickupTime: soString.split(' @ ')[1],
                 })
-            } else {
-                await smslib.sendSMS(pickup.claim.phoneNumber, message)
             }
 
             await transaction.commit()
