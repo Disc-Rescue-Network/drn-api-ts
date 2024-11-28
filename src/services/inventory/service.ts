@@ -1154,6 +1154,37 @@ export class InventoryService {
                 )
             }
 
+            const tickets = await Ticket.findAll(
+                {
+                    where: {
+                        '$nt.notification.objectId$': claim.id,
+                        '$nt.notification.type$': NOTIFICATION_TYPE.CLAIM_TICKET,
+                    },
+                    include: [
+                        {
+                            model: NotificationTicket,
+                            include: [
+                                {
+                                    model: Notification,
+                                    required: true
+                                }
+                            ],
+                            required: true
+                        }
+                    ],
+                    transaction
+                }
+            )
+
+            const resolution = []
+            for (const t of tickets)
+                resolution.push(t.update({
+                    message: 'Claim no longer exists',
+                    status: TICKET_STATUS.RESOLVED
+                }))
+
+            await Promise.all(resolution)
+
             if (claim.phoneNumber) {
                 await smslib.sendSMS(
                     claim.phoneNumber,
