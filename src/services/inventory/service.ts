@@ -1159,6 +1159,7 @@ export class InventoryService {
                     where: {
                         '$nt.notification.objectId$': claim.id,
                         '$nt.notification.type$': NOTIFICATION_TYPE.CLAIM_TICKET,
+                        status: TICKET_STATUS.UNRESOLVED,
                     },
                     include: [
                         {
