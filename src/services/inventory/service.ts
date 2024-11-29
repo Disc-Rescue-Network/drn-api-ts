@@ -728,6 +728,7 @@ export class InventoryService {
                 await this.resolveClaimTickets(
                     'Item was claimed by someone else',
                     otherClaims.map(claim => claim.id),
+                    transaction
                 )
 
                 const messages = []
