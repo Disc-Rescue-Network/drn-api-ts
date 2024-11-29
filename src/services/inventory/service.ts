@@ -734,6 +734,8 @@ export class InventoryService {
                         transaction
                     )
 
+                    await claim.destroy({ transaction })
+
                     if (claim.phoneNumber) {
                         const claimOrSurrender = claim.surrendered ? 'surrender' : 'claim'
                         messages.push(smslib.sendSMS(
