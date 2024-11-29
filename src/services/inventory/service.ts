@@ -725,23 +725,26 @@ export class InventoryService {
                     }
                 )
 
-                await this.resolveClaimTickets(
-                    'Item was claimed by someone else',
-                    otherClaims.map(claim => claim.id),
-                    transaction
-                )
-
                 const messages = []
                 for (const claim of otherClaims) {
+                    const claimedOrSurrendered = claim.surrendered ? 'surrendered' : 'claimed'
+                    await this.resolveClaimTickets(
+                        `Item was ${claimedOrSurrendered} by someone else`,
+                        claim.id,
+                        transaction
+                    )
+
                     if (claim.phoneNumber) {
+                        const claimOrSurrender = claim.surrendered ? 'surrender' : 'claim'
                         messages.push(smslib.sendSMS(
                             claim.phoneNumber,
-                            `Your claim has been rejected by a course admin. If you feel this is a mistake, please submit a ticket: app.discrescuenetwork.com/support-ticket?claimId=${claim.id}`
+                            `Your ${claimOrSurrender} has been rejected by a course admin. If you feel this is a mistake, please submit a ticket: app.discrescuenetwork.com/support-ticket?claimId=${claim.id}`
                         ))
                     } else {
                         messages.push(sendClaimRejectionEmail(
                             claim.email,
                             {
+                                surrendered: claim.surrendered,
                                 claimId: claim.id,
                                 discName: claim.item.disc.name,
                                 color: claim.item.color,
@@ -1125,13 +1128,13 @@ export class InventoryService {
 
     resolveClaimTickets = async (
         message: string,
-        claimIds: number[],
+        claimId: number,
         transaction?: Sequelize.Transaction
     ) => {
         const tickets = await Ticket.findAll(
             {
                 where: {
-                    '$nt.notification.objectId$': claimIds,
+                    '$nt.notification.objectId$': claimId,
                     '$nt.notification.type$': NOTIFICATION_TYPE.CLAIM_TICKET,
                     status: TICKET_STATUS.UNRESOLVED,
                 },
@@ -1234,9 +1237,10 @@ export class InventoryService {
             await Promise.all(resolution)
 
             if (claim.phoneNumber) {
+                const claimOrSurrender = claim.surrendered ? 'surrender' : 'claim'
                 await smslib.sendSMS(
                     claim.phoneNumber,
-                    `Your claim has been rejected by a course admin. If you feel this is a mistake, please submit a ticket: app.discrescuenetwork.com/support-ticket?claimId=${claim.id}`
+                    `Your ${claimOrSurrender} has been rejected by a course admin. If you feel this is a mistake, please submit a ticket: app.discrescuenetwork.com/support-ticket?claimId=${claim.id}`
                 )
             } else {
                 let soString = this.getFormattedScheduleDate(claim.pickup.scheduledOn)
@@ -1246,6 +1250,7 @@ export class InventoryService {
                 await sendClaimRejectionEmail(
                     claim.email,
                     {
+                        surrendered: claim.surrendered,
                         claimId: claim.id,
                         discName: claim.item.disc.name,
                         color: claim.item.color,

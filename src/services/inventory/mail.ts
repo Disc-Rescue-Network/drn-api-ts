@@ -94,6 +94,7 @@ function sendPickupCompleteEmail(
 function sendClaimRejectionEmail(
     to: string,
     context: {
+        surrendered: boolean,
         claimId: number,
         discName: string,
         courseName: string,
