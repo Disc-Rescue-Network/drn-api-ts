@@ -751,7 +751,7 @@ export class InventoryService {
                                 brand: claim.item.disc.brand.name,
                                 plasticType: claim.item.disc.plasticType,
                                 courseName: claim.pickup.course.name,
-                                pickupSchedule: soString.replace(' @ ', ' ')
+                                pickupSchedule: claim.pickup.preference
                             }
                         ))
                     }
@@ -1257,7 +1257,7 @@ export class InventoryService {
                         brand: claim.item.disc.brand.name,
                         plasticType: claim.item.disc.plasticType,
                         courseName: claim.pickup.course.name,
-                        pickupSchedule: soString ? soString.replace(' @ ', ' ') : 'NA'
+                        pickupSchedule: claim.pickup.preference
                     }
                 )
             }
