@@ -721,7 +721,8 @@ export class InventoryService {
                                 model: Pickup,
                                 include: [Course]
                             }
-                        ]
+                        ],
+                        transaction
                     }
                 )
 
