@@ -1181,7 +1181,7 @@ export class InventoryService {
                 resolution.push(t.update({
                     message: 'Claim no longer exists',
                     status: TICKET_STATUS.RESOLVED
-                }))
+                }, { transaction }))
 
             await Promise.all(resolution)
 
