@@ -725,6 +725,11 @@ export class InventoryService {
                     }
                 )
 
+                await this.resolveClaimTickets(
+                    'Item was claimed by someone else',
+                    otherClaims.map(claim => claim.id),
+                )
+
                 const messages = []
                 for (const claim of otherClaims) {
                     if (claim.phoneNumber) {
@@ -1115,6 +1120,47 @@ export class InventoryService {
             await transaction.rollback()
             throw err
         }
+    }
+
+    resolveClaimTickets = async (
+        message: string,
+        claimIds: number[],
+        transaction?: Sequelize.Transaction
+    ) => {
+        const tickets = await Ticket.findAll(
+            {
+                where: {
+                    '$nt.notification.objectId$': claimIds,
+                    '$nt.notification.type$': NOTIFICATION_TYPE.CLAIM_TICKET,
+                    status: TICKET_STATUS.UNRESOLVED,
+                },
+                include: [
+                    {
+                        model: NotificationTicket,
+                        include: [
+                            {
+                                model: Notification,
+                                required: true
+                            }
+                        ],
+                        required: true
+                    }
+                ],
+                transaction
+            }
+        )
+
+        const resolved = []
+        for (const t of tickets) {
+            resolved.push(t.update({
+                message,
+                status: TICKET_STATUS.RESOLVED
+            }, { transaction }))
+        }
+
+        await Promise.all(resolved)
+
+        return tickets
     }
 
     deleteClaim = async (claimId: number) => {
