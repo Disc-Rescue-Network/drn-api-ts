@@ -754,7 +754,7 @@ export class InventoryService {
                                 brand: claim.item.disc.brand.name,
                                 plasticType: claim.item.disc.plasticType,
                                 courseName: claim.pickup.course.name,
-                                pickupSchedule: claim.pickup.preference
+                                pickupSchedule: claim.pickup.preference.join(', ')
                             }
                         ))
                     }
@@ -1260,7 +1260,7 @@ export class InventoryService {
                         brand: claim.item.disc.brand.name,
                         plasticType: claim.item.disc.plasticType,
                         courseName: claim.pickup.course.name,
-                        pickupSchedule: claim.pickup.preference
+                        pickupSchedule: claim.pickup.preference.join(', ')
                     }
                 )
             }

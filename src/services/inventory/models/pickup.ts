@@ -29,7 +29,7 @@ export default class Pickup extends Model {
         allowNull: false,
         defaultValue: [PICKUP_PREFERENCE.WEEKEND_MORNING]
     })
-    preference: string
+    preference: string[]
 
     /* Admin sets this column when done with the verification */
     @Column({
