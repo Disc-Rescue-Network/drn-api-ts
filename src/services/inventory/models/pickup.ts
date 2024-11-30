@@ -3,8 +3,6 @@ import { DataType, BelongsTo, ForeignKey, Column, Table, Model } from 'sequelize
 import Claim from '../../inventory/models/claim'
 import Course from '../../course/models/course'
 
-import { PICKUP_PREFERENCE } from '../constant'
-
 
 @Table
 export default class Pickup extends Model {
@@ -25,9 +23,7 @@ export default class Pickup extends Model {
     course: Course
 
     @Column({
-        type: DataType.JSON,
-        allowNull: false,
-        defaultValue: [PICKUP_PREFERENCE.WEEKEND_MORNING]
+        type: DataType.JSON
     })
     preference: string[]
 
