@@ -13,6 +13,10 @@ import Pickup from './services/inventory/models/pickup'
 import VerificationOTP from './services/inventory/models/verification-otp'
 import Notification from './services/notification/models/notification'
 import Activity from './services/user/models/activity'
+import Ticket from './services/ticket/models/ticket'
+import NotificationTicket from './services/ticket/models/notification-ticket'
+import Board from './services/bulletin-board/models/board'
+import Post from './services/bulletin-board/models/post'
 
 
 ;(async function() {
@@ -26,11 +30,7 @@ import Activity from './services/user/models/activity'
             await PlasticType.sync({ alter: true })
             await DiscMold.sync({ alter: true })
 
-            /*
-             * claimBy column is generated. Syncing along with it would cause
-             * err. Syncing without it would drop it.
-             */
-            await Inventory.sync({ alter: true })
+            await Inventory.sync({ alter: true })  // claimBy column is generated. Syncing along with it would cause err. Syncing without it would drop it.
 
             await SMSLogs.sync({ alter: true })
             await PhoneOptIn.sync({ alter: true })
@@ -42,6 +42,12 @@ import Activity from './services/user/models/activity'
             await Notification.sync({ alter: true })
 
             await Activity.sync({ alter: true })
+
+            await Ticket.sync({ alter: true })
+            await NotificationTicket.sync({ alter: true })
+
+            await Board.sync({ alter: true })
+            await Post.sync({ alter: true })
         }
 
         await store.close()
