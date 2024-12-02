@@ -22,6 +22,7 @@ import sms from '../services/sms'
 import ai from '../services/ai'
 import notification from '../services/notification'
 import ticket from '../services/ticket'
+import bulletin from '../services/bulletin-board'
 
 import healthCheck from './healthcheck'
 
@@ -85,6 +86,7 @@ export class Web {
         ai.init()
         notification.init()
         ticket.init()
+        bulletin.init()
 
         this.add(oapi)
 
@@ -97,6 +99,7 @@ export class Web {
         this.add(ai.router, ai.basePath)
         this.add(notification.router, notification.basePath)
         this.add(ticket.router, ticket.basePath)
+        this.add(bulletin.router, bulletin.basePath)
 
         this.add(storeErrorHandler)
         this.add(oapiErrorHandler)
