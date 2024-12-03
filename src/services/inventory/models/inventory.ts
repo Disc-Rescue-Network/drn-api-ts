@@ -27,9 +27,9 @@ export default class Inventory extends Model {
     phoneNumber: string
 
     @Length({
-        msg: 'length needs to be between 1 and 10',
+        msg: 'length needs to be between 1 and 32',
         min: 1,
-        max: 10
+        max: 32
     })
     @Column
     bin: string
@@ -57,6 +57,9 @@ export default class Inventory extends Model {
     })
     status: string
 
+    /*
+     * Need to use SQL statement to create full text index
+     */
     @Length({
         msg: 'length needs to be between 1 and 256',
         min: 1,
@@ -77,7 +80,7 @@ export default class Inventory extends Model {
 
     /*
      * Its a virtual generated column. Will need to comment out for syncing with
-     * database.
+     * database and need to use SQL statement to add as generated column.
      */
     @Column({
         type: DataType.DATEONLY
