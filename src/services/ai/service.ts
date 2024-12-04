@@ -8,6 +8,8 @@ import vision from './vision'
 
 import { IMAGE_TEXT_CATEGORY } from './constant'
 
+import { InternalServerError } from '../../lib/error'
+
 
 export class AIService {
     init () {
@@ -37,87 +39,92 @@ export class AIService {
     }
 
     extractImageText = async (imageData: string) => {
-        const visionResponse: any = await vision.getImageText(imageData)
+        try {
+            const visionResponse: any = await vision.getImageText(imageData)
 
-        const brands = await brandLib.findAll()
+            const brands = await brandLib.findAll()
 
-        const words: { word: string }[] = visionResponse.text.words
+            const words: { word: string }[] = visionResponse.text.words
 
-        const fuseOptions = {
-            includeScore: true,
-            threshold: 0.2,
-            distance: 30,
-            location: 0,
-            includeMatches: true,
-            keys: ['name']
-        }
-
-        var fuse: Fuse<any> = new Fuse(<any>brands, fuseOptions)
-        words.forEach(word => {
-            const result = fuse.search(word.word)
-
-            const matchedTo = this.getMatchedText(result)
-            if (matchedTo)
-                word['matchedTo'] = [matchedTo]
-
-            if (result.length)
-                word['category'] = [IMAGE_TEXT_CATEGORY.BRAND]
-        })
-
-        const discs = await discLib.findAll()
-
-        var fuse: Fuse<any> = new Fuse(<any>discs, fuseOptions)
-        words.forEach(word => {
-            const result = fuse.search(word.word)
-
-            const matchedTo = this.getMatchedText(result)
-            if (matchedTo) {
-                if (!word['matchedTo'])
-                    word['matchedTo'] = []
-
-                if (!word['matchedTo'].includes(matchedTo))
-                    word['matchedTo'].push(matchedTo)
+            const fuseOptions = {
+                includeScore: true,
+                threshold: 0.2,
+                distance: 30,
+                location: 0,
+                includeMatches: true,
+                keys: ['name']
             }
 
-            if (result.length) {
-                if (word['category'])
-                    word['category'].push(IMAGE_TEXT_CATEGORY.DISC)
-                else
-                    word['category'] = [IMAGE_TEXT_CATEGORY.DISC]
-            }
-        })
+            var fuse: Fuse<any> = new Fuse(<any>brands, fuseOptions)
+            words.forEach(word => {
+                const result = fuse.search(word.word)
 
-        const phoneNumberPatterns = [
-            /* (123) */
-            /^\(\d{3}\)/,
+                const matchedTo = this.getMatchedText(result)
+                if (matchedTo)
+                    word['matchedTo'] = [matchedTo]
 
-            // 123-
-            /\d{3}\-/,
+                if (result.length)
+                    word['category'] = [IMAGE_TEXT_CATEGORY.BRAND]
+            })
 
-            // -456
-            /\-\d{3}/,
+            const discs = await discLib.findAll()
 
-            // -4566
-            /\-\d{4}/,
-        ]
+            var fuse: Fuse<any> = new Fuse(<any>discs, fuseOptions)
+            words.forEach(word => {
+                const result = fuse.search(word.word)
 
-        words.forEach(word => {
-            /*
-             * If matches anything not allowed in phone number, ignore
-             */
-            if (/[^\-\d\(\)]{1}/.test(word.word)) {
-                return
-            }
+                const matchedTo = this.getMatchedText(result)
+                if (matchedTo) {
+                    if (!word['matchedTo'])
+                        word['matchedTo'] = []
 
-            for (const pnp of phoneNumberPatterns) {
-                if (pnp.test(word.word)) {
-                    word['category'] = [IMAGE_TEXT_CATEGORY.PHONE_NUMBER]
-                    break
+                    if (!word['matchedTo'].includes(matchedTo))
+                        word['matchedTo'].push(matchedTo)
                 }
-            }
-        })
 
-        return visionResponse
+                if (result.length) {
+                    if (word['category'])
+                        word['category'].push(IMAGE_TEXT_CATEGORY.DISC)
+                    else
+                        word['category'] = [IMAGE_TEXT_CATEGORY.DISC]
+                }
+            })
+
+            const phoneNumberPatterns = [
+                /* (123) */
+                /^\(\d{3}\)/,
+
+                // 123-
+                /\d{3}\-/,
+
+                // -456
+                /\-\d{3}/,
+
+                // -4566
+                /\-\d{4}/,
+            ]
+
+            words.forEach(word => {
+                /*
+                 * If matches anything not allowed in phone number, ignore
+                 */
+                if (/[^\-\d\(\)]{1}/.test(word.word)) {
+                    return
+                }
+
+                for (const pnp of phoneNumberPatterns) {
+                    if (pnp.test(word.word)) {
+                        word['category'] = [IMAGE_TEXT_CATEGORY.PHONE_NUMBER]
+                        break
+                    }
+                }
+            })
+
+            return visionResponse
+        } catch(err) {
+            console.log(err)
+            throw new InternalServerError('Failed to extract text')
+        }
     }
 }
 
