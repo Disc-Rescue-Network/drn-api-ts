@@ -187,7 +187,7 @@ export class EnvConfig {
         this.googleConfig.type = process.env.GOOGLE_AI_ACCOUNT_TYPE
         this.googleConfig.project_id = process.env.GOOGLE_AI_PROJECT_ID
         this.googleConfig.private_key_id = process.env.GOOGLE_AI_PRIVATE_KEY_ID
-        this.googleConfig.private_key = process.env.GOOGLE_AI_PRIVATE_KEY
+        this.googleConfig.private_key = process.env.GOOGLE_AI_PRIVATE_KEY.split(String.raw`\n`).join('\n')
         this.googleConfig.client_email = process.env.GOOGLE_AI_CLIENT_EMAIL
         this.googleConfig.client_id = process.env.GOOGLE_AI_CLIENT_ID
         this.googleConfig.auth_uri = process.env.GOOGLE_AI_AUTH_URI
