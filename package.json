@@ -7,10 +7,15 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "compile": "npx tsc --watch",
     "dev": "nodemon -x 'node --env-file=.env dist/server.js'",
-    "start": "npx tsc && node --env-file=.env dist/server.js",
-    "build": "npx tsc --noCheck",
+    "debug": "nodemon -x 'node --inspect --env-file=.env dist/server.js'",
+    "start": "node dist/server.js",
+    "build": "npx tsc --noCheck && ./copy-hbs-template.sh",
     "serve": "node --env-file=.env dist/server.js",
     "dbsync": "npx tsc && node --env-file=.env dist/dbsync.js"
+  },
+  "engines": {
+      "node": "20.18.1",
+      "npm": "10.8.2"
   },
   "keywords": [],
   "author": "",
@@ -29,7 +34,7 @@
   },
   "dependencies": {
     "@google-cloud/vision": "^4.3.2",
-    "@scalar/express-api-reference": "^0.4.169",
+    "@scalar/express-api-reference": "^0.4.170",
     "@techntools/sequelize-to-openapi": "^0.4.9",
     "@wesleytodd/openapi": "^1.1.0",
     "class-transformer": "^0.5.1",
@@ -48,7 +53,7 @@
     "jwks-rsa": "^3.1.0",
     "logger": "^0.0.1",
     "morgan": "^1.10.0",
-    "mysql2": "^3.11.4",
+    "mysql2": "^3.11.5",
     "nodemailer": "^6.9.16",
     "redis": "^4.7.0",
     "sequelize-typescript": "^2.1.6",

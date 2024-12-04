@@ -1,11 +1,12 @@
 import { google } from '@google-cloud/vision/build/protos/protos'
 
-import { ImageAnnotatorClient } from "@google-cloud/vision";
-import colorName from "color-namer";
+import { ImageAnnotatorClient } from "@google-cloud/vision"
+import colorName from "color-namer"
 
-import credentials from './google-credentials.json';
+import config from "../../config"
 
-const imgAnnotator = new ImageAnnotatorClient({ credentials });
+
+const imgAnnotator = new ImageAnnotatorClient({ credentials: config.googleConfig })
 
 
 export type ImageDetectionData = {
@@ -43,8 +44,8 @@ const getImageText = async (
           type: "DOCUMENT_TEXT_DETECTION",
         },
       ],
-    };
-    const imgData = await imgAnnotator.annotateImage(req);
+    }
+    const imgData = await imgAnnotator.annotateImage(req)
     const text = imgData[0].fullTextAnnotation.pages[0].blocks.reduce(
       (prev, data) => {
         data.paragraphs.reduce((w, e) => {
@@ -53,21 +54,21 @@ const getImageText = async (
               confidence: b.confidence,
               word: b.symbols
                 .map((x) => {
-                  return x.text;
+                  return x.text
                 })
                 .join(""),
-            };
-          });
-          prev.words.push(...wordSet);
-          return w;
-        }, []);
-        return prev;
+            }
+          })
+          prev.words.push(...wordSet)
+          return w
+        }, [])
+        return prev
       },
       {
         confidence: imgData[0].fullTextAnnotation.pages[0].confidence,
         words: [],
       } as TextData
-    );
+    )
 
     const colors =
       imgData[0].imagePropertiesAnnotation?.dominantColors.colors.map(
@@ -77,11 +78,11 @@ const getImageText = async (
             name: colorName(
               `rgb(${color.color.red},${color.color.green},${color.color.blue})`
             ).ntc[0].name,
-          };
+          }
         }
-      );
+      )
     return { text, colors }
-};
+}
 
 export default {
     getImageText
