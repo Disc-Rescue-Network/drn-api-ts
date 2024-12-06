@@ -39,8 +39,6 @@ export class BulletinService {
             include,
             offset: pageOptions.offset,
             limit: pageOptions.limit,
-            raw: true,
-            nest: true
         }
 
         if (q)
