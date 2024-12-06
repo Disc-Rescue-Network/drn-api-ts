@@ -76,8 +76,6 @@ export class BulletinService {
             where,
             offset: pageOptions.offset,
             limit: pageOptions.limit,
-            raw: true,
-            nest: true
         }
 
         if (q) {
