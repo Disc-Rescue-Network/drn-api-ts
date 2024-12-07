@@ -27,7 +27,7 @@ export default class Pickup extends Model {
     })
     preference: string[]
 
-    /* Admin sets this column when done with the verification */
+    /* Admin sets this column when pickup is confirmed */
     @Column({
         validate: {
             after48Hours(this: Pickup) {
@@ -35,10 +35,7 @@ export default class Pickup extends Model {
                 const now = Date.now()
 
                 if (co <= now)
-                    throw new Error('Confirmation date must be set after 48 hours')
-
-                if (Math.abs(co - now) < 172800000)
-                    throw new Error('Confirmation date must be after 48 hours')
+                    throw new Error('Confirmation date must be set in the future')
             }
         }
     })
