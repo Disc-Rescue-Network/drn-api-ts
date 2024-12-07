@@ -316,6 +316,7 @@ export class InventoryController extends AppController {
         async (req: Request) => {
             return inventoryService.findAllClaims(
                 plainToClass(PageOptions, req.query),
+                req.auth.payload.org_code as string,
                 req.query.q as string,
             )
         }

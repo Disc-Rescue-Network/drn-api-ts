@@ -789,9 +789,12 @@ export class InventoryService {
 
     findAllClaims = async (
         pageOptions: PageOptions,
-        q: string,
+        orgCode: string,
+        q?: string,
     ) => {
-        const where: any = {}
+        const where: any = {
+            '$item.orgCode$': orgCode
+        }
         const include: any[] = [
             {
                 model: Inventory,
@@ -810,10 +813,10 @@ export class InventoryService {
         }
 
         if (q) {
-            const qs = `%${q.toLocaleLowerCase()}%`
+            const qs = `%${q.toLowerCase()}%`
 
             query.where[Op.or] = [
-                Sequelize.literal(`MATCH (comments) AGAINST (${sqlEscape(qs)})`),
+                Sequelize.literal(`MATCH (Claim.comments) AGAINST (${sqlEscape(q.toLowerCase() + '*')} IN BOOLEAN MODE)`),
                 { 'phoneNumber': { [Op.like]: qs }},
             ]
         }
