@@ -13,9 +13,9 @@ export const RESCUE_KEYWORD: string = 'rescue'
 
 export const defaultMessage = `This number is not monitored. Text HELP for help, or RESCUE for more info.`
 
-export const rescueMessage = `Reply STOP to unsubscribe. Reply TICKET or visit "app.discrescuenetwork.com" for more help. Msg&Data Rates May Apply`
+export const rescueMessage = `Reply STOP to unsubscribe. Reply TICKET or visit app.discrescuenetwork.com for more help.`
 
-export const optInMessage = `Disc Rescue Network (DRN): We’ve found your disc! Reply "CLAIM" to consent to receive text updates about your disc, including claim instructions. Msg&Data rates may apply. Reply "STOP" to opt-out.`;
+export const optInMessage = `Disc Rescue Network (DRN): We’ve found your disc! Reply CLAIM to consent to receive text updates about your disc, including claim instructions. Msg&Data rates may apply. Reply STOP to opt-out.`;
 
 export const formatClaimInventoryMessage = (
   unclaimedInventoryLength: number
